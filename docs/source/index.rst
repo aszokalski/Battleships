@@ -11,7 +11,7 @@ Welcome to Battleships's documentation!
    :caption: Contents:
 
    README.md
-   modules
+   app
 
 
 Indices and tables
