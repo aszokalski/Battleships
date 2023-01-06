@@ -17,3 +17,6 @@ source generate-docs.sh
 ```Sh
 pip install -r requirements.txt
 ```
+
+## Configuration
+You can configure the game by editing the config file: `app/config.py`
