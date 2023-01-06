@@ -141,25 +141,35 @@ class Ship:
 
 
 class Carrier(Ship):
+    """Ship with self.size = BOAT_SIZES['Carrier'] (Default: 5)
+    """
     def __init__(self) -> None:
         super().__init__(BOAT_SIZES['Carrier'])
 
 
 class Battleship(Ship):
+    """Ship with self.size = BOAT_SIZES['Battleship'] (Default: 4)
+    """
     def __init__(self) -> None:
         super().__init__(BOAT_SIZES['Battleship'])
 
 
 class Destroyer(Ship):
+    """Ship with self.size = BOAT_SIZES['Destroyer'] (Default: 3)
+    """
     def __init__(self) -> None:
         super().__init__(BOAT_SIZES['Destroyer'])
 
 
 class Submarine(Ship):
+    """Ship with self.size = BOAT_SIZES['Submarine'] (Default: 3)
+    """
     def __init__(self) -> None:
         super().__init__(BOAT_SIZES['Submarine'])
 
 
 class PatrolBoat(Ship):
+    """Ship with self.size = BOAT_SIZES['PatrolBoat'] (Default: 2)
+    """
     def __init__(self) -> None:
         super().__init__(BOAT_SIZES['PatrolBoat'])
