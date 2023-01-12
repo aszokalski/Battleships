@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 def uuid_generator():
     """Simple unique id generator. Id's are just consecutive numbers.
 
@@ -21,3 +24,9 @@ def get_uuid():
         int: uuid
     """
     return next(uuid)
+
+
+class AttackResult(Enum):
+    MISS = 0
+    HIT = 1
+    SUNK = 2
