@@ -1,11 +1,10 @@
-from ships import Ship
-
-
 class Player:
-    def __init__(self) -> None:
-        self.ships = {1: Ship(4)}
+    def __init__(self, ships: list = None) -> None:
 
-    pass
+        if ships:
+            self.ships = {ship.uuid: ship for ship in ships}
+        else:
+            self.ships = {}
 
 
 class AIPlayer(Player):

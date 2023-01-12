@@ -107,8 +107,8 @@ def test_board_calculate_square_locations_sticking_out_2():
 
 
 def test_board_add_ship():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
 
     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
@@ -138,8 +138,8 @@ def test_board_add_ship():
 
 
 def test_board_add_ship_cell_already_occupied():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
 
     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
@@ -157,8 +157,8 @@ def test_board_add_ship_does_not_exist():
 
 
 def test_board_remove_ship():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
     board.remove_ship(shipUUID=ship.uuid)
@@ -179,7 +179,7 @@ def test_board_remove_ship_does_not_exist():
 
 def test_board_remove_ship_invalid_data():
     ship = Ship(4)
-    ship.location = (456, 1)
+    ship._location = (456, 1)
     player = Player(ships=[ship])
     board = Board(player=player)
 
@@ -197,8 +197,8 @@ def test_board_remove_ship_unlocated():
 
 
 def test_board_move_ship():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
     board.move_ship(shipUUID=ship.uuid, location=(4, 4), orientation="UP")
@@ -232,8 +232,8 @@ def test_board_move_ship():
 
 
 def test_board_move_unlocated_ship():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
     board.move_ship(shipUUID=ship.uuid, location=(4, 4), orientation="UP")
 
@@ -263,8 +263,8 @@ def test_board_move_unlocated_ship():
 
 
 def test_board_get_cell():
-    player = Player()
     ship = Ship(4)
+    player = Player(ships=[ship])
     board = Board(player=player)
     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
 
