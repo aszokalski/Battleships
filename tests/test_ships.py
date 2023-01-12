@@ -42,6 +42,16 @@ def test_ship_squares():
     assert ship.squares == [True, True, True]
 
 
+def test_ship_squares_indexable():
+    ship = Ship(
+        size=3
+    )
+
+    assert ship.squares[0] is True
+    assert ship.squares[1] is True
+    assert ship.squares[2] is True
+
+
 def test_ship_size():
     ship = Ship(
         size=3

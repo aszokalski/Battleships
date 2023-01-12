@@ -1,5 +1,5 @@
 def uuid_generator():
-    """Unique id generator
+    """Simple unique id generator. Id's are just consecutive numbers.
 
     Yields:
         int: uuid
