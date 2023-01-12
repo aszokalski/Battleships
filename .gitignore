@@ -162,3 +162,4 @@ cython_debug/
 docs.html
 .vscode/
 .flake8
+.DS_Store
