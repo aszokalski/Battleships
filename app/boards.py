@@ -2,14 +2,11 @@ import config
 import numpy as np
 from players import Player
 from typing import Literal
-from ships import Ship
+from ships import Ship, LocationOutsideOfRangeError
+from utils import AttackResult
 
 
 class DoubleDestructionError(IndexError):
-    pass
-
-
-class InvalidShipPlacementError(IndexError):
     pass
 
 
@@ -99,7 +96,7 @@ class Board:
         end_location = move(start_location, size - 1)
 
         if any(coordinate not in range(self._size) for coordinate in end_location):
-            raise InvalidShipPlacementError("Ship would not fit on the board")
+            raise LocationOutsideOfRangeError("Ship would not fit on the board")
 
         return [move(start_location, x) for x in range(size)]
 
@@ -214,13 +211,22 @@ class Board:
             Cell | None: value at the given coordinates
         """
         if any(val not in range(self._size) for val in (x, y)):
-            raise IndexError("Index out of range")
+            raise LocationOutsideOfRangeError("Index out of range")
 
         return self._matrix[x, y]
 
     def get_possible_locations(
         self, size: int, orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"]
-    ):
+    ) -> list:
+        """Returns a list of possible locations for a ship of the given size and orientation
+
+        Args:
+            size (int): size of the ship
+            orientation (Literal["UP", "DOWN", "LEFT", "RIGHT"]): orientation of the ship
+
+        Returns:
+            list: list of (x, y) tuples
+        """
         location_range_function = {
             "UP": lambda board_size, ship_size: (
                 range(board_size),
@@ -250,6 +256,33 @@ class Board:
                     possible_locations.append((x, y))
 
         return possible_locations
+
+    def attack(self, x: int, y: int) -> AttackResult:
+        """Attacks the given location and returns ``AttackResult``
+
+        Args:
+            x (int): x coordinate
+            y (int): y coordinate
+
+        Raises:
+            HitDestroyedSquareError: if the cell has already been hit
+            LocationOutsideOfRangeError: if the coordinates are not on the board
+
+        Returns:
+            AttackResult: result of the attack
+        """
+        cell = self.cell(x, y)
+        if cell is None:
+            return AttackResult.MISS
+
+        ship = self._get_ship_object(cell.shipUUID)
+        strength_after_hit = ship.take_a_hit(cell.squareIndex)
+        cell.destroy()
+
+        if strength_after_hit == 0:
+            return AttackResult.SUNK
+        else:
+            return AttackResult.HIT
 
 
 class PlayerBoard(Board):

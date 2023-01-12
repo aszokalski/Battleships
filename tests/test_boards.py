@@ -2,13 +2,13 @@ from boards import (
     Board,
     Cell,
     DoubleDestructionError,
-    InvalidShipPlacementError,
     CellAlreadyOccupiedError,
     ShipDoesNotExistError,
     UnlocatedShipRemovalError,
 )
 from players import Player
-from ships import Ship
+from ships import Ship, HitDestroyedSquareError, LocationOutsideOfRangeError
+from utils import AttackResult
 import config
 import pytest
 import numpy as np
@@ -90,7 +90,7 @@ def test_board_calculate_square_locations_sticking_out_1():
     player = Player()
     board = Board(player=player)
 
-    with pytest.raises(InvalidShipPlacementError):
+    with pytest.raises(LocationOutsideOfRangeError):
         board._calculate_square_locations(
             start_location=(3, 0), orientation="LEFT", size=5
         )
@@ -100,7 +100,7 @@ def test_board_calculate_square_locations_sticking_out_2():
     player = Player()
     board = Board(player=player)
 
-    with pytest.raises(InvalidShipPlacementError):
+    with pytest.raises(LocationOutsideOfRangeError):
         board._calculate_square_locations(
             start_location=(7, 0), orientation="RIGHT", size=5
         )
@@ -183,7 +183,7 @@ def test_board_remove_ship_invalid_data():
     player = Player(ships=[ship])
     board = Board(player=player)
 
-    with pytest.raises(InvalidShipPlacementError):
+    with pytest.raises(LocationOutsideOfRangeError):
         board.remove_ship(shipUUID=ship.uuid)
 
 
@@ -276,7 +276,7 @@ def test_board_get_cell_index_error():
     player = Player()
     board = Board(player=player)
 
-    with pytest.raises(IndexError):
+    with pytest.raises(LocationOutsideOfRangeError):
         board.cell(123, 1)
 
 
@@ -330,3 +330,46 @@ def test_board_get_possible_locations_occupied_squares_3():
     assert board.get_possible_locations(size=10, orientation="RIGHT") == [
         (0, i) for i in range(1, board._size)
     ]
+
+
+def test_board_attack_hit():
+    ship = Ship(4)
+    player = Player(ships=[ship])
+    board = Board(player=player)
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+
+    assert board.attack(3, 4) == AttackResult.HIT
+    assert ship[0] is False
+
+
+def test_board_attack_miss():
+    ship = Ship(4)
+    player = Player(ships=[ship])
+    board = Board(player=player)
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+
+    assert board.attack(3, 3) == AttackResult.MISS
+
+
+def test_board_attack_sunk():
+    ship = Ship(4)
+    player = Player(ships=[ship])
+    board = Board(player=player)
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+
+    assert board.attack(3, 4) == AttackResult.HIT
+    assert board.attack(4, 4) == AttackResult.HIT
+    assert board.attack(5, 4) == AttackResult.HIT
+    assert board.attack(6, 4) == AttackResult.SUNK
+    assert ship.strength == 0
+
+
+def test_board_attack_destroyed_cell():
+    ship = Ship(4)
+    player = Player(ships=[ship])
+    board = Board(player=player)
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+    board.attack(3, 4)
+
+    with pytest.raises(HitDestroyedSquareError):
+        board.attack(3, 4)
