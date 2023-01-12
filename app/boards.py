@@ -288,7 +288,10 @@ class Board:
             return AttackResult.HIT
 
     def __str__(self):
-        return str(self._matrix)
+        return_str = ""
+        for line in str(self._matrix)[:-1].split("\n")[::-1]:
+            return_str += line[2:-1] + "\n"
+        return return_str
 
 
 class PlayerBoard(Board):
@@ -296,18 +299,6 @@ class PlayerBoard(Board):
 
 
 if __name__ == "__main__":
-
-    def formatter(x):
-        ENDC = "\033[0m"
-        BOLD = "\033[1m"
-        WARNING = "\033[93m"
-        if not x:
-            return "[ ]"
-        if x.alive:
-            return BOLD + "[O]" + ENDC
-        return BOLD + WARNING + "[X]" + ENDC + ENDC
-
-    np.set_printoptions(formatter={"all": formatter}, linewidth=100)
     ship = Ship(4)
     shipB = Ship(5)
     player = Player(ships=[ship, shipB])
@@ -317,5 +308,5 @@ if __name__ == "__main__":
     board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
 
     board.attack(3, 4)
-    for line in str(board)[:-1].split("\n")[::-1]:
-        print(line[2:-1])
+
+    print(board)
