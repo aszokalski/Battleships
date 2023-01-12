@@ -1,9 +1,5 @@
 from utils import get_uuid
-from config import (
-    BOARD_SIZE,
-    DEFAULT_ORIENTATION,
-    BOAT_SIZES
-)
+from config import BOARD_SIZE, DEFAULT_ORIENTATION, BOAT_SIZES
 from typing import Literal
 from collections.abc import Sequence
 
@@ -34,6 +30,7 @@ class Ship(Sequence):
     Args:
         size (int): size of the ship
     """
+
     def __init__(self, size: int) -> None:
         self._squares = [True for _ in range(size)]
         self._uuid = get_uuid()
@@ -99,9 +96,12 @@ class Ship(Sequence):
 
     @location.setter
     def location(self, value: tuple) -> None:
-        if (any(index not in range(0, BOARD_SIZE)
-                for index in value)):
-            raise LocationOutsideOfRangeError(f"Given location {value} does not fit on a {BOARD_SIZE}x{BOARD_SIZE} matrix")
+        if value is not None and any(
+            index not in range(0, BOARD_SIZE) for index in value
+        ):
+            raise LocationOutsideOfRangeError(
+                f"Given location {value} does not fit on a {BOARD_SIZE}x{BOARD_SIZE} matrix"
+            )
 
         self._location = value
 
@@ -123,7 +123,7 @@ class Ship(Sequence):
     @orientation.setter
     def orientation(self, value: Literal["UP", "DOWN", "RIGHT", "LEFT"]) -> None:
         orientations = ["UP", "DOWN", "RIGHT", "LEFT"]
-        if (value not in orientations):
+        if value not in orientations:
             raise IncorrectOrientationError(f"{value} not in {orientations}")
 
         self._orientation = value
@@ -142,46 +142,50 @@ class Ship(Sequence):
         Returns:
             int: strength after the hit (``0`` is destroyed)
         """
-        if (not self.location):
+        if not self.location:
             raise UnlocatedShipHitError("You cannot hit an unlocated ship")
-        if (targetIndex >= self.size):
-            raise HitOutsideOfRangeError(f"{targetIndex} is not within 0-{self.size-1} range")
-        if (not self.squares[targetIndex]):
-            raise HitDestroyedSquareError(f"ship: {self._uuid} square: {targetIndex} is already destroyed")
+        if targetIndex >= self.size:
+            raise HitOutsideOfRangeError(
+                f"{targetIndex} is not within 0-{self.size-1} range"
+            )
+        if not self.squares[targetIndex]:
+            raise HitDestroyedSquareError(
+                f"ship: {self._uuid} square: {targetIndex} is already destroyed"
+            )
         self.squares[targetIndex] = False
         return self.strength
 
 
 class Carrier(Ship):
-    """Ship with ``self.size = BOAT_SIZES['Carrier']`` (Default: ``5``)
-    """
+    """Ship with ``self.size = BOAT_SIZES['Carrier']`` (Default: ``5``)"""
+
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES['Carrier'])
+        super().__init__(BOAT_SIZES["Carrier"])
 
 
 class Battleship(Ship):
-    """Ship with ``self.size = BOAT_SIZES['Battleship']`` (Default: ``4``)
-    """
+    """Ship with ``self.size = BOAT_SIZES['Battleship']`` (Default: ``4``)"""
+
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES['Battleship'])
+        super().__init__(BOAT_SIZES["Battleship"])
 
 
 class Destroyer(Ship):
-    """Ship with ``self.size = BOAT_SIZES['Destroyer']`` (Default: ``3``)
-    """
+    """Ship with ``self.size = BOAT_SIZES['Destroyer']`` (Default: ``3``)"""
+
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES['Destroyer'])
+        super().__init__(BOAT_SIZES["Destroyer"])
 
 
 class Submarine(Ship):
-    """Ship with ``self.size = BOAT_SIZES['Submarine']`` (Default: ``3``)
-    """
+    """Ship with ``self.size = BOAT_SIZES['Submarine']`` (Default: ``3``)"""
+
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES['Submarine'])
+        super().__init__(BOAT_SIZES["Submarine"])
 
 
 class PatrolBoat(Ship):
-    """Ship with self.size = ``BOAT_SIZES['PatrolBoat']`` (Default: ``2``)
-    """
+    """Ship with self.size = ``BOAT_SIZES['PatrolBoat']`` (Default: ``2``)"""
+
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES['PatrolBoat'])
+        super().__init__(BOAT_SIZES["PatrolBoat"])
