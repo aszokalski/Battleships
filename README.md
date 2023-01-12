@@ -9,7 +9,7 @@
 - Build the docs
 
 ```Sh
-source generate-docs.sh
+source docs/generate.sh
 ```
 
 - Open `docs.html`
