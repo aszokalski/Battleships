@@ -51,6 +51,9 @@ class Cell:
 
         self._alive = False
 
+    def __repr__(self):
+        return f"Cell({self.shipUUID}, {self.squareIndex}, {self.alive})"
+
 
 class Board:
     def __init__(self, player: Player) -> None:
@@ -284,6 +287,35 @@ class Board:
         else:
             return AttackResult.HIT
 
+    def __str__(self):
+        return str(self._matrix)
+
 
 class PlayerBoard(Board):
     pass
+
+
+if __name__ == "__main__":
+
+    def formatter(x):
+        ENDC = "\033[0m"
+        BOLD = "\033[1m"
+        WARNING = "\033[93m"
+        if not x:
+            return "[ ]"
+        if x.alive:
+            return BOLD + "[O]" + ENDC
+        return BOLD + WARNING + "[X]" + ENDC + ENDC
+
+    np.set_printoptions(formatter={"all": formatter}, linewidth=100)
+    ship = Ship(4)
+    shipB = Ship(5)
+    player = Player(ships=[ship, shipB])
+    board = Board(player=player)
+
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+    board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
+
+    board.attack(3, 4)
+    for line in str(board)[:-1].split("\n")[::-1]:
+        print(line[2:-1])
