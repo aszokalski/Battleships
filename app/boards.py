@@ -285,6 +285,8 @@ class Board:
         strength_after_hit = ship.take_a_hit(cell.squareIndex)
         cell.destroy()
 
+        self._player.fleet_strength -= 1
+
         if strength_after_hit == 0:
             return AttackResult.SUNK
         else:
@@ -299,17 +301,3 @@ class Board:
 
 class PlayerBoard(Board):
     pass
-
-
-# if __name__ == "__main__":
-#     ship = Ship(4)
-#     shipB = Ship(5)
-#     player = Player(ships=[ship, shipB])
-#     board = Board(player=player)
-
-#     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
-#     board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
-
-#     board.attack(3, 4)
-
-#     print(board)

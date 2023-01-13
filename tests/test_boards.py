@@ -346,6 +346,7 @@ def test_board_attack_hit():
 
     assert board.attack(3, 4) == AttackResult.HIT
     assert ship[0] is False
+    assert board._player.fleet_strength == 3
 
 
 def test_board_attack_miss():
@@ -368,6 +369,7 @@ def test_board_attack_sunk():
     assert board.attack(5, 4) == AttackResult.HIT
     assert board.attack(6, 4) == AttackResult.SUNK
     assert ship.strength == 0
+    assert board._player.fleet_strength == 0
 
 
 def test_board_attack_destroyed_cell():
