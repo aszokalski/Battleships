@@ -1,9 +1,12 @@
 import config
 import numpy as np
-from players import Player
 from typing import Literal
 from ships import Ship, LocationOutsideOfRangeError
 from utils import AttackResult
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from players import Player
 
 
 class DoubleDestructionError(IndexError):
@@ -56,7 +59,7 @@ class Cell:
 
 
 class Board:
-    def __init__(self, player: Player) -> None:
+    def __init__(self, player: "Player") -> None:
         """Board class
 
         Args:
@@ -298,15 +301,15 @@ class PlayerBoard(Board):
     pass
 
 
-if __name__ == "__main__":
-    ship = Ship(4)
-    shipB = Ship(5)
-    player = Player(ships=[ship, shipB])
-    board = Board(player=player)
+# if __name__ == "__main__":
+#     ship = Ship(4)
+#     shipB = Ship(5)
+#     player = Player(ships=[ship, shipB])
+#     board = Board(player=player)
 
-    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
-    board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
+#     board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+#     board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
 
-    board.attack(3, 4)
+#     board.attack(3, 4)
 
-    print(board)
+#     print(board)

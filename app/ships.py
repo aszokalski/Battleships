@@ -1,5 +1,5 @@
 from utils import get_uuid
-from config import BOARD_SIZE, DEFAULT_ORIENTATION, BOAT_SIZES
+import config
 from typing import Literal
 from collections.abc import Sequence
 
@@ -35,7 +35,7 @@ class Ship(Sequence):
         self._squares = [True for _ in range(size)]
         self._uuid = get_uuid()
         self._location = None
-        self._orientation = DEFAULT_ORIENTATION
+        self._orientation = config.DEFAULT_ORIENTATION
         super().__init__()
 
     def __getitem__(self, i):
@@ -97,10 +97,10 @@ class Ship(Sequence):
     @location.setter
     def location(self, value: tuple) -> None:
         if value is not None and any(
-            index not in range(0, BOARD_SIZE) for index in value
+            index not in range(0, config.BOARD_SIZE) for index in value
         ):
             raise LocationOutsideOfRangeError(
-                f"Given location {value} does not fit on a {BOARD_SIZE}x{BOARD_SIZE} matrix"
+                f"Given location {value} does not fit on a {config.BOARD_SIZE}x{config.BOARD_SIZE} matrix"
             )
 
         self._location = value
@@ -160,32 +160,49 @@ class Carrier(Ship):
     """Ship with ``self.size = BOAT_SIZES['Carrier']`` (Default: ``5``)"""
 
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES["Carrier"])
+        super().__init__(config.BOAT_SIZES["Carrier"])
 
 
 class Battleship(Ship):
     """Ship with ``self.size = BOAT_SIZES['Battleship']`` (Default: ``4``)"""
 
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES["Battleship"])
+        super().__init__(config.BOAT_SIZES["Battleship"])
 
 
 class Destroyer(Ship):
     """Ship with ``self.size = BOAT_SIZES['Destroyer']`` (Default: ``3``)"""
 
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES["Destroyer"])
+        super().__init__(config.BOAT_SIZES["Destroyer"])
 
 
 class Submarine(Ship):
     """Ship with ``self.size = BOAT_SIZES['Submarine']`` (Default: ``3``)"""
 
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES["Submarine"])
+        super().__init__(config.BOAT_SIZES["Submarine"])
 
 
 class PatrolBoat(Ship):
     """Ship with self.size = ``BOAT_SIZES['PatrolBoat']`` (Default: ``2``)"""
 
     def __init__(self) -> None:
-        super().__init__(BOAT_SIZES["PatrolBoat"])
+        super().__init__(config.BOAT_SIZES["PatrolBoat"])
+
+
+def get_default_ship_set():
+    ship_name_to_class = {
+        "Carrier": Carrier,
+        "Battleship": Battleship,
+        "Destroyer": Destroyer,
+        "Submarine": Submarine,
+        "PatrolBoat": PatrolBoat,
+    }
+
+    default_ship_set = []
+    for qty, name in config.DEFAULT_SHIP_SET:
+        for _ in range(qty):
+            default_ship_set.append(ship_name_to_class[name]())
+
+    return default_ship_set

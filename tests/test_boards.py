@@ -180,7 +180,7 @@ def test_board_remove_ship_does_not_exist():
     board = Board(player=player)
 
     with pytest.raises(ShipDoesNotExistError):
-        board.remove_ship(shipUUID=10)
+        board.remove_ship(shipUUID=11)
 
 
 def test_board_remove_ship_invalid_data():

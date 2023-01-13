@@ -10,9 +10,10 @@ from ships import (
     Submarine,
     PatrolBoat,
     Battleship,
+    get_default_ship_set,
 )
-from config import DEFAULT_ORIENTATION, BOAT_SIZES
 import pytest
+import config
 
 
 def test_ship_constructor(monkeypatch):
@@ -26,7 +27,7 @@ def test_ship_constructor(monkeypatch):
     assert ship._squares == [True, True, True]
     assert ship._uuid == 123
     assert ship._location is None
-    assert ship._orientation == DEFAULT_ORIENTATION
+    assert ship._orientation == config.DEFAULT_ORIENTATION
 
 
 def test_ship_squares():
@@ -91,7 +92,7 @@ def test_ship_location_none():
 def test_ship_orientation():
     ship = Ship(size=3)
 
-    assert ship.orientation is DEFAULT_ORIENTATION
+    assert ship.orientation is config.DEFAULT_ORIENTATION
 
     ship.orientation = "DOWN"
 
@@ -101,7 +102,7 @@ def test_ship_orientation():
 def test_ship_orientation_non_up_down_left_right():
     ship = Ship(size=3)
 
-    assert ship.orientation is DEFAULT_ORIENTATION
+    assert ship.orientation is config.DEFAULT_ORIENTATION
 
     with pytest.raises(IncorrectOrientationError):
         ship.orientation = "jejdeje"
@@ -150,24 +151,39 @@ def test_ship_take_a_hit_already_destroyed():
 
 def test_carrier():
     ship = Carrier()
-    assert ship.size == BOAT_SIZES["Carrier"]
+    assert ship.size == config.BOAT_SIZES["Carrier"]
 
 
 def test_battleship():
     ship = Battleship()
-    assert ship.size == BOAT_SIZES["Battleship"]
+    assert ship.size == config.BOAT_SIZES["Battleship"]
 
 
 def test_destroyer():
     ship = Destroyer()
-    assert ship.size == BOAT_SIZES["Destroyer"]
+    assert ship.size == config.BOAT_SIZES["Destroyer"]
 
 
 def test_submarine():
     ship = Submarine()
-    assert ship.size == BOAT_SIZES["Submarine"]
+    assert ship.size == config.BOAT_SIZES["Submarine"]
 
 
 def test_patrol_boat():
     ship = PatrolBoat()
-    assert ship.size == BOAT_SIZES["PatrolBoat"]
+    assert ship.size == config.BOAT_SIZES["PatrolBoat"]
+
+
+def test_get_default_ship_class_set():
+    pre_val = config.DEFAULT_SHIP_SET
+
+    config.DEFAULT_SHIP_SET = [(2, "Carrier"), (1, "Battleship")]
+
+    default_set = get_default_ship_set()
+
+    assert isinstance(default_set[0], Carrier)
+    assert isinstance(default_set[1], Carrier)
+    assert isinstance(default_set[2], Battleship)
+
+    # setting it back to default because other tests use it
+    config.DEFAULT_SHIP_SET = pre_val
