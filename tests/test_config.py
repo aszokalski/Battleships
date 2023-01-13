@@ -29,3 +29,13 @@ def test_config_boat_sizes():
 
     # setting it back to default because other tests use it
     config.BOAT_SIZES = pre_val
+
+
+def test_config_default_ship_set():
+    pre_val = config.DEFAULT_SHIP_SET
+
+    config.DEFAULT_SHIP_SET = []
+    assert config.DEFAULT_SHIP_SET == []
+
+    # setting it back to default because other tests use it
+    config.DEFAULT_SHIP_SET = pre_val

@@ -30,6 +30,12 @@ def test_cell_destroy():
     assert cell.alive is False
 
 
+def test_cell_repr():
+    cell = Cell(shipUUID=57, squareIndex=2, alive=True)
+
+    assert cell.__repr__() == "Cell(57, 2, True)"
+
+
 def test_cell_destroy_dead():
     cell = Cell(shipUUID=57, squareIndex=2, alive=False)
 
@@ -174,7 +180,7 @@ def test_board_remove_ship_does_not_exist():
     board = Board(player=player)
 
     with pytest.raises(ShipDoesNotExistError):
-        board.remove_ship(shipUUID=10)
+        board.remove_ship(shipUUID=11)
 
 
 def test_board_remove_ship_invalid_data():
@@ -340,6 +346,7 @@ def test_board_attack_hit():
 
     assert board.attack(3, 4) == AttackResult.HIT
     assert ship[0] is False
+    assert board._player.fleet_strength == 3
 
 
 def test_board_attack_miss():
@@ -362,6 +369,7 @@ def test_board_attack_sunk():
     assert board.attack(5, 4) == AttackResult.HIT
     assert board.attack(6, 4) == AttackResult.SUNK
     assert ship.strength == 0
+    assert board._player.fleet_strength == 0
 
 
 def test_board_attack_destroyed_cell():
@@ -373,3 +381,25 @@ def test_board_attack_destroyed_cell():
 
     with pytest.raises(HitDestroyedSquareError):
         board.attack(3, 4)
+
+
+def test_board_str():
+    ship = Ship(4)
+    player = Player(ships=[ship])
+    board = Board(player=player)
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+    board.attack(3, 4)
+    assert (
+        str(board)
+        == """[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] \x1b[1m\x1b[93m[X]\x1b[0m\x1b[0m [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+"""
+    )

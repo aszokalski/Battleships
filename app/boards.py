@@ -1,9 +1,12 @@
 import config
 import numpy as np
-from players import Player
 from typing import Literal
 from ships import Ship, LocationOutsideOfRangeError
 from utils import AttackResult
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from players import Player
 
 
 class DoubleDestructionError(IndexError):
@@ -56,7 +59,7 @@ class Cell:
 
 
 class Board:
-    def __init__(self, player: Player) -> None:
+    def __init__(self, player: "Player") -> None:
         """Board class
 
         Args:
@@ -282,40 +285,19 @@ class Board:
         strength_after_hit = ship.take_a_hit(cell.squareIndex)
         cell.destroy()
 
+        self._player.fleet_strength -= 1
+
         if strength_after_hit == 0:
             return AttackResult.SUNK
         else:
             return AttackResult.HIT
 
     def __str__(self):
-        return str(self._matrix)
+        return_str = ""
+        for line in str(self._matrix)[:-1].split("\n")[::-1]:
+            return_str += line[2:-1] + "\n"
+        return return_str
 
 
 class PlayerBoard(Board):
     pass
-
-
-if __name__ == "__main__":
-
-    def formatter(x):
-        ENDC = "\033[0m"
-        BOLD = "\033[1m"
-        WARNING = "\033[93m"
-        if not x:
-            return "[ ]"
-        if x.alive:
-            return BOLD + "[O]" + ENDC
-        return BOLD + WARNING + "[X]" + ENDC + ENDC
-
-    np.set_printoptions(formatter={"all": formatter}, linewidth=100)
-    ship = Ship(4)
-    shipB = Ship(5)
-    player = Player(ships=[ship, shipB])
-    board = Board(player=player)
-
-    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
-    board.add_ship(shipUUID=shipB.uuid, location=(0, 1), orientation="UP")
-
-    board.attack(3, 4)
-    for line in str(board)[:-1].split("\n")[::-1]:
-        print(line[2:-1])
