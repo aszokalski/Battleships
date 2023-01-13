@@ -8,6 +8,12 @@ class EnemyUnsetError(Exception):
 
 class Player:
     def __init__(self, name: str = "Unnamed", ships: list = None) -> None:
+        """Player class
+
+        Args:
+            name (str, optional): player's name. Defaults to "Unnamed".
+            ships (list, optional): initial ship list. If not set, default ship set will be used. Defaults to None.
+        """
         ships = ships if ships else get_default_ship_set()
         self._ships = {ship.uuid: ship for ship in ships}
         self._name = name
@@ -17,31 +23,64 @@ class Player:
 
     @property
     def ships(self) -> dict:
+        """Returns the player's ships
+
+        Returns:
+            dict: player's ships
+        """
         return self._ships
 
     @property
     def name(self) -> str:
+        """Returns the player's name
+
+        Returns:
+            str: player's name
+        """
         return self._name
 
     @property
     def board(self) -> Board:
+        """Returns the player's board object
+
+        Returns:
+            Board: player's board
+        """
         return self._board
 
     @property
     def enemy_board(self) -> Board:
+        """Returns the enemy's board object
+
+        Raises:
+            EnemyUnsetError: if the enemy is not set
+
+        Returns:
+            Board: enemy's board
+        """
         if self._enemy is None:
             raise EnemyUnsetError("Enemy board is not set")
         return self._enemy.board
 
     @property
     def fleet_strength(self) -> int:
+        """Returns the player's fleet strength (sum of all ships' sizes)
+
+        Returns:
+            int: player's fleet strength
+        """
         return self._fleet_strength
 
     @fleet_strength.setter
     def fleet_strength(self, value: int) -> None:
         self._fleet_strength = value
 
-    def set_enemy(self, enemy) -> None:
+    def set_enemy(self, enemy: "Player") -> None:
+        """Sets the enemy
+
+        Args:
+            enemy (Player): enemy player
+        """
         self._enemy = enemy
 
 
