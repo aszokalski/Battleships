@@ -1,6 +1,7 @@
 # Quickstart
 
 ## Documentation
+
 The documentation is hosted on Github Pages: https://aszokalski.github.io/Battleships-Docs/
 
 ## Requirements
