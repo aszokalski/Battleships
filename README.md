@@ -1,5 +1,8 @@
 # Quickstart
-## [Documentation](https://aszokalski.github.io/Battleships-Docs/)
+
+## Documentation
+The documentation is hosted on Github Pages: https://aszokalski.github.io/Battleships-Docs/
+
 ## Requirements
 
 - Python `3.11` or newer
