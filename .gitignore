@@ -163,3 +163,4 @@ docs.html
 .vscode/
 .flake8
 .DS_Store
+docs/publish.sh
