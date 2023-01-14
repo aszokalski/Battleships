@@ -15,7 +15,7 @@ The documentation is hosted on Github Pages: https://aszokalski.github.io/Battle
 pip install -r requirements.txt
 ```
 
-## Building the docs
+## Building the docs locally
 
 - Build the docs
 
