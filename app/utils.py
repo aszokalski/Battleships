@@ -31,18 +31,3 @@ class AttackResult(Enum):
     MISS = 0
     HIT = 1
     SUNK = 2
-
-
-# Numpy setup
-def formatter(x):
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    WARNING = "\033[93m"
-    if not x:
-        return "[ ]"
-    if x.alive:
-        return BOLD + "[O]" + ENDC
-    return BOLD + WARNING + "[X]" + ENDC + ENDC
-
-
-np.set_printoptions(formatter={"all": formatter}, linewidth=100)
