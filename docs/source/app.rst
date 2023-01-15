@@ -12,6 +12,7 @@ Submodules
    app.game
    app.players
    app.ships
+   app.ui
    app.utils
 
 Module contents

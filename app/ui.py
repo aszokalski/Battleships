@@ -6,6 +6,12 @@ from enum import IntEnum
 
 
 class Styles(IntEnum):
+    """Text styles for the CLI
+
+    Args:
+        IntEnum (_type_): enum type
+    """
+
     GRID = 1
     SHIP = 2
     DESTROYED = 3
@@ -15,6 +21,7 @@ class Styles(IntEnum):
 
 class CLI:
     def __init__(self) -> None:
+        """CLI class"""
         self.screen = curses.initscr()
         self.screen.keypad(True)
         curses.curs_set(0)
@@ -68,6 +75,14 @@ class CLI:
             self.screen.refresh()
 
     def get_location(self, board: Board) -> tuple:
+        """Gets a location from the user
+
+        Args:
+            board (Board): board to get the location from
+
+        Returns:
+            tuple: (x, y) location
+        """
         x, y = 0, 0
 
         while True:
@@ -87,7 +102,17 @@ class CLI:
                 break
         return (x, y)
 
-    def get_move_ship_data(self, ship: Ship, board: Board):
+    def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
+        """Gets the new position and orientation of a ship from user.
+        It ensures validity of the data.
+
+        Args:
+            ship (Ship): ship to move
+            board (Board): board to move the ship on
+
+        Returns:
+            tuple: (x, y, orientation)
+        """
         location = ship.location
         orientation = ship.orientation
         size = ship.size
@@ -105,6 +130,7 @@ class CLI:
         def calculate_edge_indexes(
             current_orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"]
         ):
+            """A helper function to calculate the edge positions of the ship on the board"""
             loc_max_y = (
                 board.size - ship.size
                 if current_orientation == "UP"
@@ -187,6 +213,12 @@ class CLI:
             self.screen.refresh()
 
     def wrap(self, function: Callable):
+        """Wraps a function to catch keyboard interrupts or other errors and close the screen
+
+        Args:
+            function (Callable): function to wrap
+        """
+
         def wrapped_function():
             try:
                 return function()
@@ -199,6 +231,7 @@ class CLI:
         return wrapped_function
 
     def close(self):
+        """Closes the screen"""
         self.screen.keypad(0)
         curses.echo()
         curses.nocbreak()
