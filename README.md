@@ -2,7 +2,7 @@
 
 ## Documentation
 
-The documentation is hosted on Github Pages: https://aszokalski.github.io/Battleships-Docs/
+The documentation is hosted on Github Pages: [documentation](https://aszokalski.github.io/Battleships-Docs/)
 
 ## Requirements
 

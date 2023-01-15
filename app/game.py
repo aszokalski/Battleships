@@ -1,2 +1,6 @@
+from players import Player
+
+
 class Game:
-    pass
+    def __init__(self, playerA: Player, playerB: Player) -> None:
+        

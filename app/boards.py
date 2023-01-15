@@ -71,7 +71,16 @@ class Board:
             self._size, self._size
         )
 
-    def _calculate_square_locations(
+    @property
+    def size(self) -> int:
+        """Board size
+
+        Returns:
+            int: board size
+        """
+        return self._size
+
+    def calculate_square_locations(
         self,
         start_location: tuple,
         orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"],
@@ -85,7 +94,7 @@ class Board:
             size (int): size of the ship
 
         Raises:
-            InvalidShipPlacementError: if the ship would not fit on the board
+            LocationOutsideOfRangeError: if the ship would not fit on the board
 
         Returns:
             list: list of the locations of the squares of the ship
@@ -138,12 +147,12 @@ class Board:
 
         Raises:
             CellAlreadyOccupiedError: if the ship would overlap with another ship
-            InvalidShipPlacementError: if the ship would not fit on the board
+            LocationOutsideOfRange: if the ship would not fit on the board
             ShipDoesNotExistError: if the ship does not exist
 
         """
         ship = self._get_ship_object(shipUUID)
-        square_locations = self._calculate_square_locations(
+        square_locations = self.calculate_square_locations(
             location, orientation, ship.size
         )
 
@@ -152,7 +161,7 @@ class Board:
 
         for index, square in enumerate(square_locations):
             self._matrix[*square] = Cell(
-                shipUUID=shipUUID, squareIndex=index, alive=True
+                shipUUID=shipUUID, squareIndex=index, alive=ship[index]
             )
         ship.location = location
         ship.orientation = orientation
@@ -172,7 +181,7 @@ class Board:
         if not ship.location:
             raise UnlocatedShipRemovalError("Ship is not located")
 
-        square_locations = self._calculate_square_locations(
+        square_locations = self.calculate_square_locations(
             ship.location, ship.orientation, ship.size
         )
 
@@ -255,7 +264,7 @@ class Board:
         possible_locations = []
         for x in x_range:
             for y in y_range:
-                square_locations = self._calculate_square_locations(
+                square_locations = self.calculate_square_locations(
                     (x, y), orientation, size
                 )
                 if all(self._matrix[*square] is None for square in square_locations):
@@ -291,12 +300,6 @@ class Board:
             return AttackResult.SUNK
         else:
             return AttackResult.HIT
-
-    def __str__(self):
-        return_str = ""
-        for line in str(self._matrix)[:-1].split("\n")[::-1]:
-            return_str += line[2:-1] + "\n"
-        return return_str
 
 
 class PlayerBoard(Board):

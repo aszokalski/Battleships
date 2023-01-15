@@ -56,11 +56,18 @@ def test_board_constructor():
     assert np.array_equal(board._matrix, empty_matrix)
 
 
+def test_board_size():
+    player = Player()
+    board = Board(player=player)
+
+    assert board.size == config.BOARD_SIZE
+
+
 def test_board_calculate_square_locations_UP():
     player = Player()
     board = Board(player=player)
 
-    assert board._calculate_square_locations(
+    assert board.calculate_square_locations(
         start_location=(0, 0), orientation="UP", size=5
     ) == [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
 
@@ -69,7 +76,7 @@ def test_board_calculate_square_locations_DOWN():
     player = Player()
     board = Board(player=player)
 
-    assert board._calculate_square_locations(
+    assert board.calculate_square_locations(
         start_location=(0, 4), orientation="DOWN", size=5
     ) == [(0, 4), (0, 3), (0, 2), (0, 1), (0, 0)]
 
@@ -78,7 +85,7 @@ def test_board_calculate_square_locations_RIGHT():
     player = Player()
     board = Board(player=player)
 
-    assert board._calculate_square_locations(
+    assert board.calculate_square_locations(
         start_location=(0, 0), orientation="RIGHT", size=5
     ) == [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
 
@@ -87,7 +94,7 @@ def test_board_calculate_square_locations_LEFT():
     player = Player()
     board = Board(player=player)
 
-    assert board._calculate_square_locations(
+    assert board.calculate_square_locations(
         start_location=(4, 0), orientation="LEFT", size=5
     ) == [(4, 0), (3, 0), (2, 0), (1, 0), (0, 0)]
 
@@ -97,7 +104,7 @@ def test_board_calculate_square_locations_sticking_out_1():
     board = Board(player=player)
 
     with pytest.raises(LocationOutsideOfRangeError):
-        board._calculate_square_locations(
+        board.calculate_square_locations(
             start_location=(3, 0), orientation="LEFT", size=5
         )
 
@@ -107,7 +114,7 @@ def test_board_calculate_square_locations_sticking_out_2():
     board = Board(player=player)
 
     with pytest.raises(LocationOutsideOfRangeError):
-        board._calculate_square_locations(
+        board.calculate_square_locations(
             start_location=(7, 0), orientation="RIGHT", size=5
         )
 
@@ -128,6 +135,43 @@ def test_board_add_ship():
     assert board._matrix[4, 4].shipUUID == ship.uuid
     assert board._matrix[4, 4].squareIndex == 1
     assert board._matrix[4, 4].alive is True
+
+    assert isinstance(board._matrix[5, 4], Cell)
+    assert board._matrix[5, 4].shipUUID == ship.uuid
+    assert board._matrix[5, 4].squareIndex == 2
+    assert board._matrix[5, 4].alive is True
+
+    assert isinstance(board._matrix[6, 4], Cell)
+    assert board._matrix[6, 4].shipUUID == ship.uuid
+    assert board._matrix[6, 4].squareIndex == 3
+    assert board._matrix[6, 4].alive is True
+
+    assert player.ships[ship.uuid].location == (3, 4)
+    assert player.ships[ship.uuid].orientation == "RIGHT"
+
+
+def test_board_add_ship_with_damage():
+    # This functionality isn't really
+    # crucial but it makes the code more versitale and allows
+    # for implementing custom game modes in the future
+
+    ship = Ship(4)
+    ship._squares = [True, False, True, True]
+
+    player = Player(ships=[ship])
+    board = Board(player=player)
+
+    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
+
+    assert isinstance(board._matrix[3, 4], Cell)
+    assert board._matrix[3, 4].shipUUID == ship.uuid
+    assert board._matrix[3, 4].squareIndex == 0
+    assert board._matrix[3, 4].alive is True
+
+    assert isinstance(board._matrix[4, 4], Cell)
+    assert board._matrix[4, 4].shipUUID == ship.uuid
+    assert board._matrix[4, 4].squareIndex == 1
+    assert board._matrix[4, 4].alive is False
 
     assert isinstance(board._matrix[5, 4], Cell)
     assert board._matrix[5, 4].shipUUID == ship.uuid
@@ -381,25 +425,3 @@ def test_board_attack_destroyed_cell():
 
     with pytest.raises(HitDestroyedSquareError):
         board.attack(3, 4)
-
-
-def test_board_str():
-    ship = Ship(4)
-    player = Player(ships=[ship])
-    board = Board(player=player)
-    board.add_ship(shipUUID=ship.uuid, location=(3, 4), orientation="RIGHT")
-    board.attack(3, 4)
-    assert (
-        str(board)
-        == """[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] \x1b[1m[O]\x1b[0m [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] \x1b[1m\x1b[93m[X]\x1b[0m\x1b[0m [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-[ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-"""
-    )
