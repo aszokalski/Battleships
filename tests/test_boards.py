@@ -63,40 +63,85 @@ def test_board_size():
     assert board.size == config.BOARD_SIZE
 
 
-def test_board_calculate_square_locations_UP():
+def test_board_calculate_square_locations_UP_partial_surround():
     player = Player()
     board = Board(player=player)
 
-    assert board.calculate_square_locations(
+    square_locations = board.calculate_square_locations(
         start_location=(0, 0), orientation="UP", size=5
-    ) == [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
+    )
+
+    # Square locations of the ship
+    assert square_locations[0] == [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
+
+    # Square locations of the surrounding area
+    assert square_locations[1] == [
+        (0, 0),
+        (0, 1),
+        (0, 2),
+        (0, 3),
+        (0, 4),
+        (0, 5),
+        (1, 0),
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5),
+    ]
 
 
-def test_board_calculate_square_locations_DOWN():
+def test_board_calculate_square_locations_DOWN_partial_surround():
     player = Player()
     board = Board(player=player)
 
-    assert board.calculate_square_locations(
+    square_locations = board.calculate_square_locations(
         start_location=(0, 4), orientation="DOWN", size=5
-    ) == [(0, 4), (0, 3), (0, 2), (0, 1), (0, 0)]
+    )
+
+    assert square_locations[0] == [(0, 4), (0, 3), (0, 2), (0, 1), (0, 0)]
+    assert square_locations[1] == [
+        (0, 5),
+        (0, 4),
+        (0, 3),
+        (0, 2),
+        (0, 1),
+        (0, 0),
+        (1, 5),
+        (1, 4),
+        (1, 3),
+        (1, 2),
+        (1, 1),
+        (1, 0),
+    ]
 
 
-def test_board_calculate_square_locations_RIGHT():
+def test_board_calculate_square_locations_RIGHT_full_suround():
     player = Player()
     board = Board(player=player)
 
-    assert board.calculate_square_locations(
-        start_location=(0, 0), orientation="RIGHT", size=5
-    ) == [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+    square_locations = board.calculate_square_locations(
+        start_location=(1, 1), orientation="RIGHT", size=5
+    )
+
+    assert square_locations[0] == [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1)]
+    assert set(square_locations[1]) == set([(x, y) for x in range(7) for y in range(3)])
 
 
-def test_board_calculate_square_locations_LEFT():
+def test_board_calculate_square_locations_LEFT_partial_surround():
     player = Player()
     board = Board(player=player)
 
     assert board.calculate_square_locations(
         start_location=(4, 0), orientation="LEFT", size=5
-    ) == [(4, 0), (3, 0), (2, 0), (1, 0), (0, 0)]
+    )[0] == [(4, 0), (3, 0), (2, 0), (1, 0), (0, 0)]
+
+    square_locations = board.calculate_square_locations(
+        start_location=(4, 1), orientation="LEFT", size=5
+    )
+
+    assert square_locations[0] == [(4, 1), (3, 1), (2, 1), (1, 1), (0, 1)]
+    assert set(square_locations[1]) == set([(x, y) for x in range(5, -1, -1) for y in range(3)])
 
 
 def test_board_calculate_square_locations_sticking_out_1():

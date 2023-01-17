@@ -102,6 +102,90 @@ class CLI:
                 break
         return (x, y)
 
+    def _calculate_edge_indexes(
+        self,
+        current_orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"],
+        board_size: int,
+        ship_size: int,
+    ) -> tuple:
+        """A helper function to calculate the edge positions of the ship on the board
+
+        Args:
+            current_orientation (Literal["UP", "DOWN", "LEFT", "RIGHT"]): current orientation of the ship
+            board_size (int): board size
+            ship_size (int): ship size
+
+        Returns:
+            tuple: (max_x, min_x, max_y, min_y)
+        """
+        max_y = (
+            board_size - ship_size if current_orientation == "UP" else board_size - 1
+        )
+        min_y = ship_size - 1 if current_orientation == "DOWN" else 0
+        min_x = ship_size - 1 if current_orientation == "LEFT" else 0
+        max_x = (
+            board_size - ship_size if current_orientation == "RIGHT" else board_size - 1
+        )
+        return (max_x, min_x, max_y, min_y)
+
+    def _draw_ship(
+        self,
+        ship: Ship,
+        board: Board,
+        ship_square_locations: list,
+        possible_location: bool = True,
+    ) -> None:
+        """Draws a ship on the board. It clolors the ship ``config.colors.ErrorColor`` if it's not possible to place it there.
+
+        Args:
+            ship (Ship): ship object
+            board (Board): board object
+            ship_square_locations (list): list of (x, y) locations of the ship
+            possible_location (bool, optional): indicates if it's possible to place
+            the ship in that location. Defaults to True.
+        """
+        for i, location in enumerate(ship_square_locations):
+            draw_y = board.size - 1 - location[1]
+            draw_x = 2 * location[0]
+
+            alive = ship[i]
+            color = Styles.SHIP if possible_location else Styles.ERROR
+            self.screen.addstr(
+                draw_y,
+                draw_x,
+                "O" if alive else "X",
+                curses.color_pair(color) | (curses.A_BOLD if i == 0 else 0),
+            )
+
+    def _next_orientation(
+        self,
+        current_orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"],
+        location: tuple,
+        board_size: int,
+        ship_size: int,
+    ) -> Literal["UP", "DOWN", "LEFT", "RIGHT"]:
+        """Calculates the next (clockwise) orientation of the ship.
+        If it is not possible to rotate the ship in a given location,
+        it returns the current orientation.
+
+        Returns:
+            Literal["UP", "DOWN", "LEFT", "RIGHT"]: Ship orientation
+        """
+        orientation_cycle = ["UP", "RIGHT", "DOWN", "LEFT"]
+        next_orientation = orientation_cycle[
+            (orientation_cycle.index(current_orientation) + 1) % 4
+        ]
+
+        max_x, min_x, max_y, min_y = self._calculate_edge_indexes(
+            next_orientation, board_size, ship_size
+        )
+        if location[0] in range(min_x, max_x + 1) and location[1] in range(
+            min_y, max_y + 1
+        ):
+            return next_orientation
+
+        return current_orientation
+
     def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
         """Gets the new position and orientation of a ship from user.
         It ensures validity of the data.
@@ -118,7 +202,6 @@ class CLI:
         size = ship.size
 
         x, y = 0, 0
-        possible_location = True
 
         ommit_locations = []
         if location:
@@ -127,68 +210,31 @@ class CLI:
             )
             x, y = location
 
-        def calculate_edge_indexes(
-            current_orientation: Literal["UP", "DOWN", "LEFT", "RIGHT"]
-        ):
-            """A helper function to calculate the edge positions of the ship on the board"""
-            loc_max_y = (
-                board.size - ship.size
-                if current_orientation == "UP"
-                else board.size - 1
-            )
-            loc_min_y = ship.size - 1 if current_orientation == "DOWN" else 0
-            loc_min_x = ship.size - 1 if current_orientation == "LEFT" else 0
-            loc_max_x = (
-                board.size - ship.size
-                if current_orientation == "RIGHT"
-                else board.size - 1
-            )
-            return (loc_max_x, loc_min_x, loc_max_y, loc_min_y)
-
         while True:
             self.screen.clear()
             self.show_board(board, skip_refresh=True, ommit_locations=ommit_locations)
 
-            # Check if the ship can be placed there
             square_locations = board.calculate_square_locations(
                 (x, y), orientation, size
             )
+
+            # Check if the ship can be placed there
             if any(
                 board.cell(*square) is not None and square not in ommit_locations
-                for square in square_locations
+                for square in square_locations[1]
             ):
                 possible_location = False
             else:
                 possible_location = True
 
-            # Draw the ship
-            for i in range(size):
-                if orientation == "UP":
-                    draw_y = board.size - 1 - y - i
-                    draw_x = 2 * x
-                elif orientation == "DOWN":
-                    draw_y = board.size - 1 - y + i
-                    draw_x = 2 * x
-                elif orientation == "LEFT":
-                    draw_y = board.size - 1 - y
-                    draw_x = 2 * (x - i)
-                elif orientation == "RIGHT":
-                    draw_y = board.size - 1 - y
-                    draw_x = 2 * (x + i)
-
-                alive = ship[i]
-                color = Styles.SHIP if possible_location else Styles.ERROR
-                self.screen.addstr(
-                    draw_y,
-                    draw_x,
-                    "O" if alive else "X",
-                    curses.color_pair(color) | (curses.A_BOLD if i == 0 else 0),
-                )
+            self._draw_ship(ship, board, square_locations[0], possible_location)
 
             # Read user input
             key = self.screen.getch()
 
-            max_x, min_x, max_y, min_y = calculate_edge_indexes(orientation)
+            max_x, min_x, max_y, min_y = self._calculate_edge_indexes(
+                orientation, board.size, ship.size
+            )
             if key == curses.KEY_UP and y < max_y:
                 y += 1
             elif key == curses.KEY_DOWN and y > min_y:
@@ -198,14 +244,9 @@ class CLI:
             elif key == curses.KEY_RIGHT and x < max_x:
                 x += 1
             elif key == ord(" "):
-                orientation_cycle = ["UP", "RIGHT", "DOWN", "LEFT"]
-                next_orientation = orientation_cycle[
-                    (orientation_cycle.index(orientation) + 1) % 4
-                ]
-                max_x, min_x, max_y, min_y = calculate_edge_indexes(next_orientation)
-                if x in range(min_x, max_x + 1) and y in range(min_y, max_y + 1):
-                    orientation = next_orientation
-
+                orientation = self._next_orientation(
+                    orientation, (x, y), board.size, ship.size
+                )
             elif key == ord("\n"):
                 if possible_location:
                     return x, y, orientation
