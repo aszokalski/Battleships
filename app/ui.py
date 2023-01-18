@@ -7,6 +7,10 @@ import curses
 from enum import IntEnum
 
 
+class ShipPlacementAborted(Exception):
+    pass
+
+
 class Styles(IntEnum):
     """Text styles for the CLI
 
@@ -258,7 +262,7 @@ class CLI:
         tab_width = 3
         ship_type_groups = {}
         for ship in board.player.ships.values():
-            if ship.location is None:
+            if ship.under_edition is True:
                 ship_type = ship.__class__.__name__
                 group = ship_type_groups.get(ship_type, [])
                 group.append(ship)
@@ -282,10 +286,12 @@ class CLI:
         Args:
             ship (Ship): ship to move
             board (Board): board to move the ship on
+            initial(bool): if the ship is being placed for the first time
 
         Returns:
             tuple: (x, y, orientation)
         """
+
         location = ship.location
         orientation = ship.orientation
         size = ship.size
@@ -296,7 +302,7 @@ class CLI:
         if location:
             ommit_locations = board.calculate_square_locations(
                 location, orientation, ship.size
-            )
+            )[0]
             x, y = location
 
         while True:
@@ -333,6 +339,8 @@ class CLI:
             elif key == ord("\n"):
                 if possible_location:
                     return x, y, orientation
+            elif key in (127, 8):  # 127 for darwin and 8 for win
+                raise ShipPlacementAborted
             else:
                 x, y = self._transform_location(key, (x, y), max_x, min_x, max_y, min_y)
 
@@ -350,6 +358,9 @@ class CLI:
                 return function()
             except KeyboardInterrupt:
                 self.close()
+            except curses.error:
+                self.close()
+                print("Terminal window too small. Please resize it and try again.")
             except BaseException as e:
                 self.close()
                 raise e

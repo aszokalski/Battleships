@@ -1,5 +1,5 @@
 BOARD_SIZE = 10
-DEFAULT_ORIENTATION = "UP"
+DEFAULT_ORIENTATION = "UP"  # or "RIGHT". Other options are not possible
 
 BOAT_SIZES = {
     "Carrier": 5,
@@ -19,4 +19,4 @@ DEFAULT_SHIP_SET = [
 
 
 DEFAULT_PLAYER_SIDE = 0  # 0 - Left, 1 - Right
-DEFAULT_SPACE_BETWEEN_BOARDS = 1  # in terminal character widths
+DEFAULT_SPACE_BETWEEN_BOARDS = 3  # in terminal character widths

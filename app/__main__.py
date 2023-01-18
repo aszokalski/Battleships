@@ -1,24 +1,16 @@
-from players import Player
+from players import Player, AIPlayer
+from game import Game
 
 from ui import CLI
 
-
-player = Player(name="Adam")
-enemy = Player(side=1, name="AI")
-player.set_enemy(enemy)
-enemy.set_enemy(player)
-
-# player.board.add_ship(0, (6, 6), "LEFT")
-# player.board.add_ship(1, (3, 3), "RIGHT")
-# enemy.enemy_board.attack(6, 6)
 cli = CLI()
 
 
 def loop():
-    for ship_uuid, ship in player.ships.items():
-        x, y, orientation = cli.get_move_ship_data(ship, player.board)
-        player.board.move_ship(ship_uuid, (x, y), orientation)
-
+    player = Player(side=0, name="Adam", ui=cli)
+    enemy = AIPlayer(side=1, name="AI")
+    game = Game(player, enemy)
+    game.initialize_boards()
     (x, y) = cli.get_location(player.board, enemy.board)
 
 

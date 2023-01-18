@@ -36,6 +36,7 @@ class Ship(Sequence):
         self._uuid = get_uuid()
         self._location = None
         self._orientation = config.DEFAULT_ORIENTATION
+        self._under_edition = True
         super().__init__()
 
     def __getitem__(self, i):
@@ -127,6 +128,16 @@ class Ship(Sequence):
             raise IncorrectOrientationError(f"{value} not in {orientations}")
 
         self._orientation = value
+
+    @property
+    def under_edition(self):
+        return self._under_edition
+
+    @under_edition.setter
+    def under_edition(self, value: bool):
+        if type(value) is not bool:
+            raise TypeError("under_edition must be a bool")
+        self._under_edition = value
 
     def take_a_hit(self, targetIndex: int):
         """Destroys a given square

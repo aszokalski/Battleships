@@ -1,7 +1,9 @@
-from players import Player, EnemyUnsetError
+from players import Player, AIPlayer, EnemyUnsetError
 from ships import Ship, get_default_ship_set
+from boards import Board
 import config
 import pytest
+import numpy as np
 
 
 def test_player_constructor_1():
@@ -26,6 +28,16 @@ def test_player_constructor_2():
         assert player_ship_key == player_ship.uuid
 
     assert player._name == "Unnamed"
+
+
+def test_player_ui():
+    class fake_CLI:
+        def __init__(self):
+            pass
+
+    player = Player(ui=fake_CLI())
+
+    assert type(player._ui) == fake_CLI
 
 
 def test_player_name():
@@ -82,3 +94,35 @@ def test_player_fleet_strength():
     player.fleet_strength -= 1
 
     assert player.fleet_strength == 3
+
+
+def test_player_cli_initialize_board():
+    class fake_CLI:
+        def __init__(self):
+            pass
+
+        def get_move_ship_data(self, ship: Ship, board: Board):
+            return (
+                *board.get_possible_locations(ship.size, ship.orientation)[0],
+                ship.orientation,
+            )
+
+    player = Player(ui=fake_CLI())
+    player.initialize_board()
+
+    # Check if the number of occupied squares
+    # on the matrix is equal to the sum of the
+    # ship sizes
+    x = player.board._matrix
+    assert np.count_nonzero(x != None) == player.fleet_strength  # noqa: E711
+
+
+def test_ai_player_initialize_board():
+    player = AIPlayer()
+    player.initialize_board()
+
+    # Check if the number of occupied squares
+    # on the matrix is equal to the sum of the
+    # ship sizes
+    x = player.board._matrix
+    assert np.count_nonzero(x != None) == player.fleet_strength  # noqa: E711

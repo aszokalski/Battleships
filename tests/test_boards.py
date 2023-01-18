@@ -410,7 +410,7 @@ def test_board_get_possible_locations_occupied_squares_1():
     board._matrix[3, 6] = Cell(shipUUID=1, squareIndex=3, alive=True)
 
     assert board.get_possible_locations(size=10, orientation="RIGHT") == [
-        (0, i) for i in chain(range(4), range(7, board._size))
+        (0, i) for i in chain(range(3), range(8, board._size))
     ]
 
 
@@ -422,7 +422,7 @@ def test_board_get_possible_locations_occupied_squares_2():
     board._matrix[2, 0] = Cell(shipUUID=1, squareIndex=3, alive=True)
 
     assert board.get_possible_locations(size=10, orientation="RIGHT") == [
-        (0, i) for i in range(1, board._size)
+        (0, i) for i in range(2, board._size)
     ]
 
 
@@ -432,7 +432,7 @@ def test_board_get_possible_locations_occupied_squares_3():
     board._matrix[0, 0] = Cell(shipUUID=1, squareIndex=0, alive=True)
 
     assert board.get_possible_locations(size=10, orientation="RIGHT") == [
-        (0, i) for i in range(1, board._size)
+        (0, i) for i in range(2, board._size)
     ]
 
 

@@ -28,6 +28,7 @@ def test_ship_constructor(monkeypatch):
     assert ship._uuid == 123
     assert ship._location is None
     assert ship._orientation == config.DEFAULT_ORIENTATION
+    assert ship._under_edition is True
 
 
 def test_ship_squares():
@@ -75,6 +76,18 @@ def test_ship_location():
     ship.location = (1, 4)
 
     assert ship.location == (1, 4)
+
+
+def test_ship_under_edition():
+    ship = Ship(size=3)
+    ship.under_edition = False
+    assert ship.under_edition is False
+
+
+def test_ship_under_edition_type_error():
+    ship = Ship(size=3)
+    with pytest.raises(TypeError):
+        ship.under_edition = 3
 
 
 def test_ship_location_outside_of_range():

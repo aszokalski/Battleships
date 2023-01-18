@@ -1,5 +1,7 @@
 from boards import Board
 from ships import get_default_ship_set
+from ui import CLI, ShipPlacementAborted
+from random import choice
 import config
 
 
@@ -13,6 +15,7 @@ class Player:
         name: str = "Unnamed",
         ships: list = None,
         side: int = config.DEFAULT_PLAYER_SIDE,
+        ui: CLI | None = None,
     ) -> None:
         """Player class
 
@@ -20,6 +23,7 @@ class Player:
             name (str, optional): player's name. Defaults to "Unnamed".
             ships (list, optional): initial ship list. If not set, default ship set will be used. Defaults to None.
             side (int, optional): side to display the board (0 - left, 1 - right)
+            ui (CLI | None, optional): CLI object to use. (if not set CLI will not be used) Defaults to None
         """
         ships = ships if ships else get_default_ship_set()
         self._ships = {ship.uuid: ship for ship in ships}
@@ -28,6 +32,7 @@ class Player:
         self._side = side
         self._enemy = None
         self._fleet_strength = sum([ship.size for ship in ships])
+        self._ui = ui
 
     @property
     def ships(self) -> dict:
@@ -100,6 +105,42 @@ class Player:
         """
         self._enemy = enemy
 
+    def initialize_board(self) -> None:
+        """Initializes the board according to the user input"""
+        i = 0
+        while i < len(self.ships):
+            ship = list(self.ships.values())[i]
+            try:
+                ship.under_edition = True
+                x, y, orientation = self._ui.get_move_ship_data(ship, self.board)
+                self.board.move_ship(ship.uuid, (x, y), orientation)
+                i += 1
+                ship.under_edition = False
+            except ShipPlacementAborted:
+                if i > 0:
+                    i -= 1
+
 
 class AIPlayer(Player):
-    pass
+    def __init__(
+        self,
+        name: str = "AI",
+        ships: list = None,
+        side: int = config.DEFAULT_PLAYER_SIDE,
+    ) -> None:
+        """Player that makes smart moves on its own
+
+        Args:
+            name (str, optional): player's name. Defaults to "Unnamed".
+            ships (list, optional): initial ship list. If not set, default ship set will be used. Defaults to None.
+            side (int, optional): side to display the board (0 - left, 1 - right)
+        """
+        super().__init__(name, ships, side, None)
+
+    def initialize_board(self) -> None:
+        """Initializes the board with random ship placement"""
+        for ship in self.ships.values():
+            orientation = choice(["UP", "DOWN", "LEFT", "RIGHT"])
+            x, y = choice(self.board.get_possible_locations(ship.size, orientation))
+
+            self.board.move_ship(ship.uuid, (x, y), orientation)
