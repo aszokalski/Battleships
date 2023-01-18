@@ -1,6 +1,7 @@
 from boards import Board
 from ships import Ship
 import config
+import cli_config
 from typing import Callable, Literal
 import curses
 from enum import IntEnum
@@ -10,7 +11,7 @@ class Styles(IntEnum):
     """Text styles for the CLI
 
     Args:
-        IntEnum (_type_): enum type
+        IntEnum: color number
     """
 
     GRID = 1
@@ -28,11 +29,11 @@ class CLI:
         curses.curs_set(0)
         curses.start_color()
         curses.cbreak()
-        curses.init_pair(Styles.GRID, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(Styles.SHIP, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        curses.init_pair(Styles.DESTROYED, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        curses.init_pair(Styles.SELECTOR, curses.COLOR_BLACK, curses.COLOR_WHITE)
-        curses.init_pair(Styles.ERROR, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(Styles.GRID, *cli_config.colors["grid"])
+        curses.init_pair(Styles.SHIP, *cli_config.colors["ship"])
+        curses.init_pair(Styles.DESTROYED, *cli_config.colors["destroyed"])
+        curses.init_pair(Styles.SELECTOR, *cli_config.colors["selector"])
+        curses.init_pair(Styles.ERROR, *cli_config.colors["error"])
 
     def _calculate_edge_indexes(
         self,
@@ -77,13 +78,13 @@ class CLI:
             the ship in that location. Defaults to True.
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 1
-            else 0
+            else 1
         )
 
         for i, location in enumerate(ship_square_locations):
-            draw_y = board.size - location[1]
+            draw_y = board.size - location[1] + 1
             draw_x = 2 * (horizontal_offset + location[0])
 
             alive = ship[i]
@@ -91,7 +92,7 @@ class CLI:
             self.screen.addstr(
                 draw_y,
                 draw_x,
-                "O" if alive else "X",
+                cli_config.symbols["ship"] if alive else cli_config.symbols["shipHit"],
                 curses.color_pair(color) | (curses.A_BOLD if i == 0 else 0),
             )
 
@@ -168,15 +169,15 @@ class CLI:
             skip_refresh (bool, optional): Decides of the function will skip the screen refresh. Defaults to False.
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 1
-            else 0
+            else 1
         )
 
         if not skip_refresh:
             self.screen.clear()
 
-        self.screen.addstr(0, horizontal_offset * 2, board.player.name)
+        self.screen.addstr(0, (horizontal_offset - 1) * 2, board.player.name)
 
         for i in range(board.size):
             for j in range(board.size):
@@ -184,20 +185,20 @@ class CLI:
                 color = Styles.GRID
                 if ommit_locations and (i, j) in ommit_locations or not cell:
                     bold = False
-                    symbol = "·"
+                    symbol = cli_config.symbols["cell"]
                 else:
                     bold = True
                     if cell.alive:
                         color = Styles.SHIP
-                        symbol = "O"
+                        symbol = cli_config.symbols["ship"]
                     else:
                         color = Styles.DESTROYED
-                        symbol = "X"
+                        symbol = cli_config.symbols["shipHit"]
                 if hilight and (i, j) == hilight:
                     color = Styles.SELECTOR
 
                 self.screen.addstr(
-                    board.size - j,
+                    board.size - j + 1,
                     (horizontal_offset + i) * 2,
                     symbol,
                     curses.color_pair(color)
@@ -247,9 +248,9 @@ class CLI:
             board (Board): board on which the positioning occurs
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 0
-            else 0
+            else 1
         )
 
         self.screen.addstr(0, horizontal_offset * 2, "Remaining fleet:")
@@ -270,6 +271,9 @@ class CLI:
                 f"{len(ships):>{tab_width+1}}x {ship_type:<10} ({ships[0].size})",
                 curses.A_BOLD if i == 0 else 0,
             )
+
+    def show_instructions(self, instructions: str):
+        self.screen.addstr(config.BOARD_SIZE + 3, 0, instructions)
 
     def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
         """Gets the new position and orientation of a ship from user.
@@ -299,6 +303,7 @@ class CLI:
             self.screen.clear()
             self.show_board(board, skip_refresh=True, ommit_locations=ommit_locations)
             self._show_remaining_fleet(board)
+            self.show_instructions(cli_config.instructions["positioning"])
 
             square_locations = board.calculate_square_locations(
                 (x, y), orientation, size

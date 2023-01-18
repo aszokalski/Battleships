@@ -19,7 +19,7 @@ def loop():
         x, y, orientation = cli.get_move_ship_data(ship, player.board)
         player.board.move_ship(ship_uuid, (x, y), orientation)
 
-    (x, y) = cli.get_location(player.board)
+    (x, y) = cli.get_location(player.board, enemy.board)
 
 
 loop = cli.wrap(loop)
