@@ -39,3 +39,13 @@ def test_config_default_ship_set():
 
     # setting it back to default because other tests use it
     config.DEFAULT_SHIP_SET = pre_val
+
+
+def test_config_default_player_side():
+    pre_val = config.DEFAULT_PLAYER_SIDE
+
+    config.DEFAULT_PLAYER_SIDE = 1
+    assert config.DEFAULT_PLAYER_SIDE == 1
+
+    # setting it back to default because other tests use it
+    config.DEFAULT_PLAYER_SIDE = pre_val

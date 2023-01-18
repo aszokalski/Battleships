@@ -1,5 +1,6 @@
 from boards import Board
 from ships import get_default_ship_set
+import config
 
 
 class EnemyUnsetError(Exception):
@@ -7,17 +8,24 @@ class EnemyUnsetError(Exception):
 
 
 class Player:
-    def __init__(self, name: str = "Unnamed", ships: list = None) -> None:
+    def __init__(
+        self,
+        name: str = "Unnamed",
+        ships: list = None,
+        side: int = config.DEFAULT_PLAYER_SIDE,
+    ) -> None:
         """Player class
 
         Args:
             name (str, optional): player's name. Defaults to "Unnamed".
             ships (list, optional): initial ship list. If not set, default ship set will be used. Defaults to None.
+            side (int, optional): side to display the board (0 - left, 1 - right)
         """
         ships = ships if ships else get_default_ship_set()
         self._ships = {ship.uuid: ship for ship in ships}
         self._name = name
         self._board = Board(self)
+        self._side = side
         self._enemy = None
         self._fleet_strength = sum([ship.size for ship in ships])
 
@@ -38,6 +46,15 @@ class Player:
             str: player's name
         """
         return self._name
+
+    @property
+    def side(self) -> str:
+        """Returns the player's side
+
+        Returns:
+            int: player's side
+        """
+        return self._side
 
     @property
     def board(self) -> Board:

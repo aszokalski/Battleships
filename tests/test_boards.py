@@ -63,6 +63,13 @@ def test_board_size():
     assert board.size == config.BOARD_SIZE
 
 
+def test_board_player():
+    player = Player()
+    board = Board(player=player)
+
+    assert board.player == player
+
+
 def test_board_calculate_square_locations_UP_partial_surround():
     player = Player()
     board = Board(player=player)
@@ -141,7 +148,9 @@ def test_board_calculate_square_locations_LEFT_partial_surround():
     )
 
     assert square_locations[0] == [(4, 1), (3, 1), (2, 1), (1, 1), (0, 1)]
-    assert set(square_locations[1]) == set([(x, y) for x in range(5, -1, -1) for y in range(3)])
+    assert set(square_locations[1]) == set(
+        [(x, y) for x in range(5, -1, -1) for y in range(3)]
+    )
 
 
 def test_board_calculate_square_locations_sticking_out_1():

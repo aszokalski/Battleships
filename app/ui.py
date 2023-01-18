@@ -1,5 +1,6 @@
 from boards import Board
 from ships import Ship
+import config
 from typing import Callable, Literal
 import curses
 from enum import IntEnum
@@ -32,75 +33,6 @@ class CLI:
         curses.init_pair(Styles.DESTROYED, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         curses.init_pair(Styles.SELECTOR, curses.COLOR_BLACK, curses.COLOR_WHITE)
         curses.init_pair(Styles.ERROR, curses.COLOR_RED, curses.COLOR_BLACK)
-
-    def show_board(
-        self,
-        board: Board,
-        hilight: None | tuple = None,
-        ommit_locations: list | None = None,
-        skip_refresh: bool = False,
-    ) -> None:
-        """Prints board to the console.
-
-        Args:
-            board (Board): board to print
-        """
-        self.screen.clear()
-        for i in range(board.size):
-            for j in range(board.size):
-                cell = board.cell(i, j)
-                color = Styles.GRID
-                if ommit_locations and (i, j) in ommit_locations or not cell:
-                    bold = False
-                    symbol = "·"
-                else:
-                    bold = True
-                    if cell.alive:
-                        color = Styles.SHIP
-                        symbol = "O"
-                    else:
-                        color = Styles.DESTROYED
-                        symbol = "X"
-                if hilight and (i, j) == hilight:
-                    color = Styles.SELECTOR
-
-                self.screen.addstr(
-                    board.size - j - 1,
-                    i * 2,
-                    symbol,
-                    curses.color_pair(color)
-                    | (curses.A_BOLD if bold else curses.A_NORMAL),
-                )
-        if not skip_refresh:
-            self.screen.refresh()
-
-    def get_location(self, board: Board) -> tuple:
-        """Gets a location from the user
-
-        Args:
-            board (Board): board to get the location from
-
-        Returns:
-            tuple: (x, y) location
-        """
-        x, y = 0, 0
-
-        while True:
-            self.screen.clear()
-            self.show_board(board, (x, y))
-
-            key = self.screen.getch()
-            if key == curses.KEY_UP and y < board.size - 1:
-                y += 1
-            elif key == curses.KEY_DOWN and y > 0:
-                y -= 1
-            elif key == curses.KEY_LEFT and x > 0:
-                x -= 1
-            elif key == curses.KEY_RIGHT and x < board.size - 1:
-                x += 1
-            elif key == ord("\n"):
-                break
-        return (x, y)
 
     def _calculate_edge_indexes(
         self,
@@ -144,9 +76,15 @@ class CLI:
             possible_location (bool, optional): indicates if it's possible to place
             the ship in that location. Defaults to True.
         """
+        horizontal_offset = (
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            if board.player.side == 1
+            else 0
+        )
+
         for i, location in enumerate(ship_square_locations):
-            draw_y = board.size - 1 - location[1]
-            draw_x = 2 * location[0]
+            draw_y = board.size - location[1]
+            draw_x = 2 * (horizontal_offset + location[0])
 
             alive = ship[i]
             color = Styles.SHIP if possible_location else Styles.ERROR
@@ -186,13 +124,132 @@ class CLI:
 
         return current_orientation
 
-    def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
+    def _transform_location(
+        self, key: int, location: tuple, max_x: int, min_x: int, max_y: int, min_y: int
+    ):
+        """Transforms a given location based on the user input (key) and given boundaries.
+
+        Args:
+            key (int): user input key code
+            location (tuple): (x, y)
+            max_x (int): max x index
+            min_x (int): min x index
+            max_y (int): max y index
+            min_y (int): min y index
+
+        Returns:
+            _type_: _description_
+        """
+        x, y = location
+        if key == curses.KEY_UP and y < max_y:
+            y += 1
+        elif key == curses.KEY_DOWN and y > min_y:
+            y -= 1
+        elif key == curses.KEY_LEFT and x > min_x:
+            x -= 1
+        elif key == curses.KEY_RIGHT and x < max_x:
+            x += 1
+
+        return x, y
+
+    def show_board(
+        self,
+        board: Board,
+        hilight: None | tuple = None,
+        ommit_locations: list | None = None,
+        skip_refresh: bool = False,
+    ) -> None:
+        """Prints board to the console.
+
+        Args:
+            board (Board): The board to be printed
+            hilight (None | tuple, optional): (x, y) location to be highlited. Defaults to None.
+            ommit_locations (list | None, optional): list of (x, y) locations not to be shown. Defaults to None.
+            skip_refresh (bool, optional): Decides of the function will skip the screen refresh. Defaults to False.
+        """
+        horizontal_offset = (
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            if board.player.side == 1
+            else 0
+        )
+
+        if not skip_refresh:
+            self.screen.clear()
+
+        self.screen.addstr(0, horizontal_offset * 2, board.player.name)
+
+        for i in range(board.size):
+            for j in range(board.size):
+                cell = board.cell(i, j)
+                color = Styles.GRID
+                if ommit_locations and (i, j) in ommit_locations or not cell:
+                    bold = False
+                    symbol = "·"
+                else:
+                    bold = True
+                    if cell.alive:
+                        color = Styles.SHIP
+                        symbol = "O"
+                    else:
+                        color = Styles.DESTROYED
+                        symbol = "X"
+                if hilight and (i, j) == hilight:
+                    color = Styles.SELECTOR
+
+                self.screen.addstr(
+                    board.size - j,
+                    (horizontal_offset + i) * 2,
+                    symbol,
+                    curses.color_pair(color)
+                    | (curses.A_BOLD if bold else curses.A_NORMAL),
+                )
+
+        if not skip_refresh:
+            self.screen.refresh()
+
+    def get_location(
+        self, board: Board, additional_board: Board | None = None
+    ) -> tuple:
+        """Gets a location from the user
+
+        Args:
+            board (Board): board to get the location from
+            additional_board (Board, optional): board to be shown but not to be interacted with. Defaults to None
+
+        Returns:
+            tuple: (x, y) location
+        """
+        x, y = 0, 0
+
+        while True:
+            self.screen.clear()
+            if additional_board:
+                self.show_board(board, (x, y), skip_refresh=True)
+                self.show_board(additional_board, skip_refresh=True)
+                self.screen.refresh()
+            else:
+                self.show_board(board, (x, y))
+
+            key = self.screen.getch()
+            if key == ord("\n"):
+                break
+            else:
+                x, y = self._transform_location(
+                    key, (x, y), board.size - 1, 0, board.size - 1, 0
+                )
+
+        return (x, y)
+
+    def get_move_ship_data(
+        self, ship: Ship, board: Board, additional_board: Board | None = None
+    ) -> tuple:
         """Gets the new position and orientation of a ship from user.
         It ensures validity of the data.
 
         Args:
             ship (Ship): ship to move
             board (Board): board to move the ship on
+            additional_board (Board, optional): board to be shown but not to be interacted with. Defaults to None
 
         Returns:
             tuple: (x, y, orientation)
@@ -212,7 +269,15 @@ class CLI:
 
         while True:
             self.screen.clear()
-            self.show_board(board, skip_refresh=True, ommit_locations=ommit_locations)
+            if additional_board:
+                self.show_board(
+                    board, skip_refresh=True, ommit_locations=ommit_locations
+                )
+                self.show_board(additional_board, skip_refresh=True)
+            else:
+                self.show_board(
+                    board, skip_refresh=True, ommit_locations=ommit_locations
+                )
 
             square_locations = board.calculate_square_locations(
                 (x, y), orientation, size
@@ -235,21 +300,15 @@ class CLI:
             max_x, min_x, max_y, min_y = self._calculate_edge_indexes(
                 orientation, board.size, ship.size
             )
-            if key == curses.KEY_UP and y < max_y:
-                y += 1
-            elif key == curses.KEY_DOWN and y > min_y:
-                y -= 1
-            elif key == curses.KEY_LEFT and x > min_x:
-                x -= 1
-            elif key == curses.KEY_RIGHT and x < max_x:
-                x += 1
-            elif key == ord(" "):
+            if key == ord(" "):
                 orientation = self._next_orientation(
                     orientation, (x, y), board.size, ship.size
                 )
             elif key == ord("\n"):
                 if possible_location:
                     return x, y, orientation
+            else:
+                x, y = self._transform_location(key, (x, y), max_x, min_x, max_y, min_y)
 
             self.screen.refresh()
 

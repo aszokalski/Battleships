@@ -80,6 +80,15 @@ class Board:
         """
         return self._size
 
+    @property
+    def player(self) -> "Player":
+        """Player who owns the board
+
+        Returns:
+            Player: player object
+        """
+        return self._player
+
     def calculate_square_locations(
         self,
         start_location: tuple,

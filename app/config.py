@@ -16,3 +16,7 @@ DEFAULT_SHIP_SET = [
     (2, "Submarine"),
     (2, "PatrolBoat"),
 ]
+
+
+DEFAULT_PLAYER_SIDE = 0  # 0 - Left, 1 - Right
+DEFAULT_SPACE_BETWEEN_BOARDS = 1  # in terminal character widths

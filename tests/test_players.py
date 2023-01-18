@@ -1,5 +1,6 @@
 from players import Player, EnemyUnsetError
 from ships import Ship, get_default_ship_set
+import config
 import pytest
 
 
@@ -12,6 +13,7 @@ def test_player_constructor_1():
     assert player._board._player == player
     assert player._enemy is None
     assert player._fleet_strength == 4
+    assert player._side == config.DEFAULT_PLAYER_SIDE
 
 
 def test_player_constructor_2():
@@ -37,6 +39,12 @@ def test_player_ships():
     player = Player(ships=[ship])
 
     assert player.ships == {ship.uuid: ship}
+
+
+def test_player_side():
+    player = Player(side=1)
+
+    assert player.side == 1
 
 
 def test_player_board():

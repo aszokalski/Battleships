@@ -3,8 +3,8 @@ from players import Player
 from ui import CLI
 
 
-player = Player()
-enemy = Player()
+player = Player(name="Adam")
+enemy = Player(side=1, name="AI")
 player.set_enemy(enemy)
 enemy.set_enemy(player)
 
@@ -16,7 +16,7 @@ cli = CLI()
 
 def loop():
     for ship_uuid, ship in player.ships.items():
-        x, y, orientation = cli.get_move_ship_data(ship, player.board)
+        x, y, orientation = cli.get_move_ship_data(ship, player.board, enemy.board)
         player.board.move_ship(ship_uuid, (x, y), orientation)
 
     (x, y) = cli.get_location(player.board)
