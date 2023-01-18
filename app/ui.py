@@ -240,16 +240,44 @@ class CLI:
 
         return (x, y)
 
-    def get_move_ship_data(
-        self, ship: Ship, board: Board, additional_board: Board | None = None
-    ) -> tuple:
+    def _show_remaining_fleet(self, board: Board) -> None:
+        """Shows the remaining fleet during positioning
+
+        Args:
+            board (Board): board on which the positioning occurs
+        """
+        horizontal_offset = (
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS
+            if board.player.side == 0
+            else 0
+        )
+
+        self.screen.addstr(0, horizontal_offset * 2, "Remaining fleet:")
+
+        tab_width = 3
+        ship_type_groups = {}
+        for ship in board.player.ships.values():
+            if ship.location is None:
+                ship_type = ship.__class__.__name__
+                group = ship_type_groups.get(ship_type, [])
+                group.append(ship)
+                ship_type_groups[ship_type] = group
+
+        for i, (ship_type, ships) in enumerate(ship_type_groups.items()):
+            self.screen.addstr(
+                2 + i,
+                horizontal_offset * 2,
+                f"{len(ships):>{tab_width+1}}x {ship_type:<10} ({ships[0].size})",
+                curses.A_BOLD if i == 0 else 0,
+            )
+
+    def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
         """Gets the new position and orientation of a ship from user.
         It ensures validity of the data.
 
         Args:
             ship (Ship): ship to move
             board (Board): board to move the ship on
-            additional_board (Board, optional): board to be shown but not to be interacted with. Defaults to None
 
         Returns:
             tuple: (x, y, orientation)
@@ -269,15 +297,8 @@ class CLI:
 
         while True:
             self.screen.clear()
-            if additional_board:
-                self.show_board(
-                    board, skip_refresh=True, ommit_locations=ommit_locations
-                )
-                self.show_board(additional_board, skip_refresh=True)
-            else:
-                self.show_board(
-                    board, skip_refresh=True, ommit_locations=ommit_locations
-                )
+            self.show_board(board, skip_refresh=True, ommit_locations=ommit_locations)
+            self._show_remaining_fleet(board)
 
             square_locations = board.calculate_square_locations(
                 (x, y), orientation, size

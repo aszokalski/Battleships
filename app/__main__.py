@@ -16,7 +16,7 @@ cli = CLI()
 
 def loop():
     for ship_uuid, ship in player.ships.items():
-        x, y, orientation = cli.get_move_ship_data(ship, player.board, enemy.board)
+        x, y, orientation = cli.get_move_ship_data(ship, player.board)
         player.board.move_ship(ship_uuid, (x, y), orientation)
 
     (x, y) = cli.get_location(player.board)
