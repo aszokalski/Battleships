@@ -33,6 +33,7 @@ def test_game_start():
 
     game = Game(player, enemy)
     game.initialize_boards()
-    game.start()
+    result = game.start()
 
     assert player.fleet_strength == 0 or enemy.fleet_strength == 0
+    assert result == (player.fleet_strength > enemy.fleet_strength)

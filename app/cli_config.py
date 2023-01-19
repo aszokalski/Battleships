@@ -1,20 +1,22 @@
 import curses
 
+exit_instruction = "\nPress Ctrl+c to exit\n"
+
 instructions = {
     "positioning": {
         "title": "Position your ship on the map",
         "instructions": """Use ↑ ↓ → ← to navigate and ⎵ to rotate ↻.
 Click ⏎ to position the ship.
 Click ⌫ to reposition the previous ship
-    """,
+""",
     },
     "positioning_random": {
         "title": "Position your ship on the map",
         "instructions": """Use ↑ ↓ → ← to navigate and ⎵ to rotate ↻.
 Click ⏎ to position the ship.
 Click ⌫ to reposition the previous ship
-Click 'r' to randomize the board
-    """,
+Click r to randomize the board
+""",
     },
     "editing": {
         "title": "Select the ship you want to move.",
@@ -30,6 +32,9 @@ Click ⏎ to attack the cell.
 """,
     },
 }
+
+for instruction_key in instructions.keys():
+    instructions[instruction_key]["instructions"] += exit_instruction
 
 
 symbols = {
