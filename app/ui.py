@@ -72,7 +72,7 @@ class CLI:
         ship_square_locations: list,
         possible_location: bool = True,
     ) -> None:
-        """Draws a ship on the board. It clolors the ship ``config.colors.ErrorColor`` if it's not possible to place it there.
+        """Draws a ship on the board. It clolors the ship ``cli_config.colors["error"]`` if it's not possible to place it there.
 
         Args:
             ship (Ship): ship object
@@ -131,7 +131,7 @@ class CLI:
 
     def _transform_location(
         self, key: int, location: tuple, max_x: int, min_x: int, max_y: int, min_y: int
-    ):
+    ) -> tuple:
         """Transforms a given location based on the user input (key) and given boundaries.
 
         Args:
@@ -143,7 +143,7 @@ class CLI:
             min_y (int): min y index
 
         Returns:
-            _type_: _description_
+            tuple: (x, y) location
         """
         x, y = location
         if key == curses.KEY_UP and y < max_y:
@@ -163,6 +163,7 @@ class CLI:
         hilight: None | tuple = None,
         ommit_locations: list | None = None,
         skip_refresh: bool = False,
+        show_hits_only: bool = False,
     ) -> None:
         """Prints board to the console.
 
@@ -171,6 +172,7 @@ class CLI:
             hilight (None | tuple, optional): (x, y) location to be highlited. Defaults to None.
             ommit_locations (list | None, optional): list of (x, y) locations not to be shown. Defaults to None.
             skip_refresh (bool, optional): Decides of the function will skip the screen refresh. Defaults to False.
+            show_hits_only (bool, optional): Decides if only hits will be shown. Defaults to False.
         """
         horizontal_offset = (
             config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
@@ -193,8 +195,12 @@ class CLI:
                 else:
                     bold = True
                     if cell.alive:
-                        color = Styles.SHIP
-                        symbol = cli_config.symbols["ship"]
+                        color = Styles.SHIP if not show_hits_only else Styles.GRID
+                        symbol = (
+                            cli_config.symbols["ship"]
+                            if not show_hits_only
+                            else cli_config.symbols["cell"]
+                        )
                     else:
                         color = Styles.DESTROYED
                         symbol = cli_config.symbols["shipHit"]
@@ -213,14 +219,17 @@ class CLI:
             self.screen.refresh()
 
     def get_location(
-        self, board: Board, additional_board: Board | None = None
+        self,
+        board: Board,
+        additional_board: Board | None = None,
+        show_hits_only: bool = False,
     ) -> tuple:
         """Gets a location from the user
 
         Args:
             board (Board): board to get the location from
             additional_board (Board, optional): board to be shown but not to be interacted with. Defaults to None
-
+            show_hits_only (bool, optional): Decides if only hits will be shown on the ``board``. Defaults to False.
         Returns:
             tuple: (x, y) location
         """
@@ -229,7 +238,9 @@ class CLI:
         while True:
             self.screen.clear()
             if additional_board:
-                self.show_board(board, (x, y), skip_refresh=True)
+                self.show_board(
+                    board, (x, y), skip_refresh=True, show_hits_only=show_hits_only
+                )
                 self.show_board(additional_board, skip_refresh=True)
                 self.screen.refresh()
             else:
@@ -290,6 +301,9 @@ class CLI:
 
         Returns:
             tuple: (x, y, orientation)
+
+        Raises:
+            ShipPlacementAborted: if the user aborts the ship placement
         """
 
         location = ship.location

@@ -8,6 +8,7 @@ Submodules
    :maxdepth: 4
 
    app.boards
+   app.cli_config
    app.config
    app.game
    app.players

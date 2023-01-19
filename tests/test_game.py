@@ -25,3 +25,14 @@ def test_game_initialize_boards():
 
     y = enemy.board._matrix
     assert np.count_nonzero(y != None) == enemy.fleet_strength  # noqa: E711
+
+
+def test_game_start():
+    player = AIPlayer(side=0, name="AI1")
+    enemy = AIPlayer(side=1, name="AI2")
+
+    game = Game(player, enemy)
+    game.initialize_boards()
+    game.start()
+
+    assert player.fleet_strength == 0 or enemy.fleet_strength == 0

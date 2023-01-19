@@ -1,6 +1,7 @@
 from boards import Board
 from ships import get_default_ship_set
 from ui import CLI, ShipPlacementAborted
+from utils import AttackResult
 from random import choice
 import config
 
@@ -106,7 +107,7 @@ class Player:
         self._enemy = enemy
 
     def initialize_board(self) -> None:
-        """Initializes the board according to the user input"""
+        """Initializes the board using the user input"""
         i = 0
         while i < len(self.ships):
             ship = list(self.ships.values())[i]
@@ -119,6 +120,15 @@ class Player:
             except ShipPlacementAborted:
                 if i > 0:
                     i -= 1
+
+    def attack_enemy(self) -> AttackResult:
+        """Attacks the enemy using the user input
+
+        Returns:
+            AttackResult: result of the attack
+        """
+        x, y = self._ui.get_location(self.enemy_board, self.board, True)
+        return self.enemy_board.attack(x, y)
 
 
 class AIPlayer(Player):
@@ -144,3 +154,21 @@ class AIPlayer(Player):
             x, y = choice(self.board.get_possible_locations(ship.size, orientation))
 
             self.board.move_ship(ship.uuid, (x, y), orientation)
+
+    def attack_enemy(self) -> AttackResult:
+        """Attacks the enemy using most probable coordinates
+
+        Returns:
+            AttackResult: result of the attack
+        """
+        # TODO: make it smarter
+        while True:
+            x, y = choice(
+                [
+                    (i, j)
+                    for i in range(config.BOARD_SIZE)
+                    for j in range(config.BOARD_SIZE)
+                ]
+            )
+            if self.enemy_board.cell(x, y) is None or self.enemy_board.cell(x, y).alive:
+                return self.enemy_board.attack(x, y)

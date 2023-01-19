@@ -1,6 +1,7 @@
 from players import Player, AIPlayer, EnemyUnsetError
 from ships import Ship, get_default_ship_set
 from boards import Board
+from utils import AttackResult
 import config
 import pytest
 import numpy as np
@@ -126,3 +127,29 @@ def test_ai_player_initialize_board():
     # ship sizes
     x = player.board._matrix
     assert np.count_nonzero(x != None) == player.fleet_strength  # noqa: E711
+
+
+def test_player_cli_attack_enemy():
+    class fake_CLI:
+        def __init__(self):
+            pass
+
+        def get_location(self, *args):
+            return (2, 3)
+
+    player = Player(ui=fake_CLI())
+    enemy = Player()
+    player.set_enemy(enemy)
+    enemy.board.add_ship(list(enemy.ships.keys())[0], (2, 3), "UP")
+
+    assert player.attack_enemy() == AttackResult.HIT
+
+
+def test_ai_player_attack_enemy():
+    player = AIPlayer()
+    enemy = Player()
+    player.set_enemy(enemy)
+    enemy.board.add_ship(list(enemy.ships.keys())[0], (2, 3), "UP")
+
+    player.attack_enemy()
+    # TODO: Add a test for the AIPlayer attack

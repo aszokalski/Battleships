@@ -1,6 +1,5 @@
 from players import Player, AIPlayer
 from game import Game
-
 from ui import CLI
 
 cli = CLI()
@@ -11,7 +10,7 @@ def loop():
     enemy = AIPlayer(side=1, name="AI")
     game = Game(player, enemy)
     game.initialize_boards()
-    (x, y) = cli.get_location(player.board, enemy.board)
+    game.start()
 
 
 loop = cli.wrap(loop)
