@@ -17,6 +17,7 @@ def test_player_constructor_1():
     assert player._enemy is None
     assert player._fleet_strength == 4
     assert player._side == config.DEFAULT_PLAYER_SIDE
+    assert player._last_attack_result is None
 
 
 def test_player_constructor_2():
@@ -64,6 +65,13 @@ def test_player_board():
     player = Player()
 
     assert player.board._player == player
+
+
+def test_player_last_attack_result():
+    player = Player()
+
+    player.last_attack_result = AttackResult.MISS
+    assert player.last_attack_result == AttackResult.MISS
 
 
 def test_player_set_enemy():
@@ -145,7 +153,7 @@ def test_player_cli_attack_enemy():
     player.set_enemy(enemy)
     enemy.board.add_ship(list(enemy.ships.keys())[0], (2, 3), "UP")
 
-    assert player.attack_enemy() == AttackResult.HIT
+    player.last_attack_result == AttackResult.HIT
 
 
 def test_ai_player_attack_enemy():

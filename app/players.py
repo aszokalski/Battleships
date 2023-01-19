@@ -35,6 +35,7 @@ class Player:
         self._enemy = None
         self._fleet_strength = sum([ship.size for ship in ships])
         self._ui = ui
+        self._last_attack_result = None
 
     @property
     def ships(self) -> dict[int, Ship]:
@@ -85,6 +86,19 @@ class Player:
         if self._enemy is None:
             raise EnemyUnsetError("Enemy board is not set")
         return self._enemy.board
+
+    @property
+    def last_attack_result(self) -> AttackResult:
+        """Returns the last attack result
+
+        Returns:
+            AttackResult: last attack result enum
+        """
+        return self._last_attack_result
+
+    @last_attack_result.setter
+    def last_attack_result(self, value: AttackResult) -> None:
+        self._last_attack_result = value
 
     @property
     def fleet_strength(self) -> int:
@@ -186,8 +200,13 @@ class Player:
         Returns:
             AttackResult: result of the attack
         """
-        x, y = self._ui.get_location(self.enemy_board, self.board, True)
-        return self.enemy_board.attack(x, y)
+        while True:
+            x, y = self._ui.get_location(
+                self.enemy_board, self.board, True, cli_config.instructions["attacking"]
+            )
+            if self.enemy_board.cell(x, y) is None or self.enemy_board.cell(x, y).alive:
+                self.last_attack_result = self.enemy_board.attack(x, y)
+                break
 
 
 class AIPlayer(Player):
@@ -230,4 +249,5 @@ class AIPlayer(Player):
                 ]
             )
             if self.enemy_board.cell(x, y) is None or self.enemy_board.cell(x, y).alive:
-                return self.enemy_board.attack(x, y)
+                self.last_attack_result = self.enemy_board.attack(x, y)
+                break

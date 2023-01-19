@@ -23,6 +23,12 @@ Click ⏎ to select the ship.
 Click ⌫ to abort.
 """,
     },
+    "attacking": {
+        "title": "Select the cell you want to attack",
+        "instructions": """Use ↑ ↓ → ← to navigate.
+Click ⏎ to attack the cell.
+""",
+    },
 }
 
 
@@ -39,4 +45,5 @@ colors = {
     "destroyed": (curses.COLOR_YELLOW, curses.COLOR_BLACK),
     "selector": (curses.COLOR_BLACK, curses.COLOR_WHITE),
     "error": (curses.COLOR_RED, curses.COLOR_BLACK),
+    "sunk": (curses.COLOR_BLACK, curses.COLOR_BLACK),
 }

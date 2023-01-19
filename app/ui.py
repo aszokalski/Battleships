@@ -5,6 +5,8 @@ import cli_config
 from typing import Callable, Literal
 import curses
 from enum import IntEnum
+from copy import copy
+from utils import AttackResult
 
 
 class ActionAborted(Exception):
@@ -23,21 +25,27 @@ class Styles(IntEnum):
     DESTROYED = 3
     SELECTOR = 4
     ERROR = 5
+    SUNK = 6
 
 
 class CLI:
     def __init__(self) -> None:
         """CLI class"""
         self.screen = curses.initscr()
+
+        # Curses settings
         self.screen.keypad(True)
         curses.curs_set(0)
         curses.start_color()
         curses.cbreak()
+
+        # Colors
         curses.init_pair(Styles.GRID, *cli_config.colors["grid"])
         curses.init_pair(Styles.SHIP, *cli_config.colors["ship"])
         curses.init_pair(Styles.DESTROYED, *cli_config.colors["destroyed"])
         curses.init_pair(Styles.SELECTOR, *cli_config.colors["selector"])
         curses.init_pair(Styles.ERROR, *cli_config.colors["error"])
+        curses.init_pair(Styles.SUNK, *cli_config.colors["sunk"])
 
     def _calculate_edge_indexes(
         self,
@@ -72,7 +80,8 @@ class CLI:
         ship_square_locations: list,
         possible_location: bool = True,
     ) -> None:
-        """Draws a ship on the board. It clolors the ship ``cli_config.colors["error"]`` if it's not possible to place it there.
+        """Draws a ship on the board. It clolors the ship ``cli_config.colors["error"]``
+        if it's not possible to place it there.
 
         Args:
             ship (Ship): ship object
@@ -193,6 +202,7 @@ class CLI:
                     bold = False
                     symbol = cli_config.symbols["cell"]
                 else:
+                    sunk = board.player.ships[cell.shipUUID].strength == 0
                     bold = True
                     if cell.alive:
                         color = Styles.SHIP if not show_hits_only else Styles.GRID
@@ -202,7 +212,10 @@ class CLI:
                             else cli_config.symbols["cell"]
                         )
                     else:
-                        color = Styles.DESTROYED
+                        if sunk:
+                            color = Styles.SUNK
+                        else:
+                            color = Styles.DESTROYED
                         symbol = cli_config.symbols["shipHit"]
                 if hilight and (i, j) == hilight:
                     color = Styles.SELECTOR
@@ -253,6 +266,21 @@ class CLI:
                 self.show_board(board, (x, y))
 
             if instructions:
+                instructions = copy(instructions)
+                if additional_board:
+                    enemy_last_result = (
+                        additional_board.player._enemy.last_attack_result
+                    )
+                    if enemy_last_result is not None:
+                        if enemy_last_result == AttackResult.HIT:
+                            last_attack_str = "HIT your ship"
+                        elif enemy_last_result == AttackResult.MISS:
+                            last_attack_str = "MISSED"
+                        elif enemy_last_result == AttackResult.SUNK:
+                            last_attack_str = "SUNK your ship"
+                        instructions[
+                            "title"
+                        ] = f"{additional_board.player._enemy.name} {last_attack_str}!"
                 self.show_instructions(instructions)
 
             key = self.screen.getch()
