@@ -1,5 +1,5 @@
 from boards import Board
-from ships import get_default_ship_set
+from ships import Ship, get_default_ship_set
 from ui import CLI, ActionAborted
 from utils import AttackResult
 from random import choice
@@ -37,7 +37,7 @@ class Player:
         self._ui = ui
 
     @property
-    def ships(self) -> dict:
+    def ships(self) -> dict[int, Ship]:
         """Returns the player's ships
 
         Returns:

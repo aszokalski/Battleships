@@ -102,7 +102,10 @@ def test_player_cli_initialize_board():
         def __init__(self):
             pass
 
-        def get_move_ship_data(self, ship: Ship, board: Board):
+        def show_menu(self, *args):
+            pass
+
+        def get_move_ship_data(self, ship: Ship, board: Board, *args):
             return (
                 *board.get_possible_locations(ship.size, ship.orientation)[0],
                 ship.orientation,
@@ -153,3 +156,26 @@ def test_ai_player_attack_enemy():
 
     player.attack_enemy()
     # TODO: Add a test for the AIPlayer attack
+
+
+def test_player_edit_board():
+    class fake_CLI:
+        def __init__(self):
+            pass
+
+        def show_menu(self, *args):
+            pass
+
+        def get_location(self, *args, instructions, abortable):
+            return (2, 3)
+
+        def get_move_ship_data(self, ship: Ship, board: Board, *args):
+            return 5, 6, "LEFT"
+
+    player = Player(ui=fake_CLI())
+    ship_uuid = list(player.ships.keys())[0]
+    player.board.add_ship(ship_uuid, (2, 3), "UP")
+    player._edit_board()
+
+    assert player.ships[ship_uuid].location == (5, 6)
+    assert player.ships[ship_uuid].orientation == "LEFT"
