@@ -335,17 +335,19 @@ class CLI:
             option_number %= 2
             self.screen.refresh()
 
-    def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
+    def get_move_ship_data(
+        self, ship: Ship, board: Board, randomizable: bool = False
+    ) -> tuple | None:
         """Gets the new position and orientation of a ship from user.
         It ensures validity of the data.
 
         Args:
             ship (Ship): ship to move
             board (Board): board to move the ship on
-            initial(bool): if the ship is being placed for the first time
+            randomizable(bool, Optional): Decides if the user can randomize the ship placement. Defaults to False.
 
         Returns:
-            tuple: (x, y, orientation)
+            tuple | None: (x, y, orientation). If None, the user decided to randomize the ship placement
 
         Raises:
             ActionAborted: if the user aborts the ship placement
@@ -368,7 +370,11 @@ class CLI:
             self.screen.clear()
             self.show_board(board, skip_refresh=True, ommit_locations=ommit_locations)
             self._show_remaining_fleet(board)
-            self.show_instructions(cli_config.instructions["positioning"])
+            self.show_instructions(
+                cli_config.instructions[
+                    "positioning_random" if randomizable else "positioning"
+                ]
+            )
 
             square_locations = board.calculate_square_locations(
                 (x, y), orientation, size
@@ -400,6 +406,8 @@ class CLI:
                     return x, y, orientation
             elif key in (127, 8):  # 127 for darwin and 8 for win
                 raise ActionAborted
+            elif key == ord("r") and randomizable:
+                return None
             else:
                 x, y = self._transform_location(key, (x, y), max_x, min_x, max_y, min_y)
 

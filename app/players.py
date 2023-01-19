@@ -150,17 +150,29 @@ class Player:
     def initialize_board(self) -> None:
         """Initializes the board using the user input"""
         i = 0
-        while i < len(self.ships):
+        randomize = False
+        while i < len(self.ships) and not randomize:
             ship = list(self.ships.values())[i]
             try:
                 ship.under_edition = True
-                x, y, orientation = self._ui.get_move_ship_data(ship, self.board)
-                self.board.move_ship(ship.uuid, (x, y), orientation)
-                i += 1
+                data = self._ui.get_move_ship_data(ship, self.board, True)
+                if data:
+                    x, y, orientation = data
+                    self.board.move_ship(ship.uuid, (x, y), orientation)
+                    i += 1
+                else:
+                    randomize = True
                 ship.under_edition = False
             except ActionAborted:
                 if i > 0:
                     i -= 1
+
+        if randomize:
+            for ship in self.ships.values():
+                orientation = choice(["UP", "DOWN", "LEFT", "RIGHT"])
+                x, y = choice(self.board.get_possible_locations(ship.size, orientation))
+                self.board.move_ship(ship.uuid, (x, y), orientation)
+                ship.under_edition = False
 
         self._ui.show_menu(
             "Do you confirm this ship placement?",
@@ -199,8 +211,8 @@ class AIPlayer(Player):
         for ship in self.ships.values():
             orientation = choice(["UP", "DOWN", "LEFT", "RIGHT"])
             x, y = choice(self.board.get_possible_locations(ship.size, orientation))
-
             self.board.move_ship(ship.uuid, (x, y), orientation)
+            ship.under_edition = False
 
     def attack_enemy(self) -> AttackResult:
         """Attacks the enemy using most probable coordinates
