@@ -1,10 +1,20 @@
 import curses
 
 instructions = {
-    "positioning": """Use ↑ ↓ → ← to navigate and ⎵ to rotate ↻.
+    "positioning": {
+        "title": "Position your ship on the map",
+        "instructions": """Use ↑ ↓ → ← to navigate and ⎵ to rotate ↻.
 Click ⏎ to position the ship.
 Click ⌫ to reposition the previous ship
-    """
+    """,
+    },
+    "editing": {
+        "title": "Select the ship you want to move.",
+        "instructions": """Use ↑ ↓ → ← to navigate.
+Click ⏎ to select the ship.
+Click ⌫ to abort.
+""",
+    },
 }
 
 

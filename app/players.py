@@ -1,9 +1,10 @@
 from boards import Board
 from ships import get_default_ship_set
-from ui import CLI, ShipPlacementAborted
+from ui import CLI, ActionAborted
 from utils import AttackResult
 from random import choice
 import config
+import cli_config
 
 
 class EnemyUnsetError(Exception):
@@ -106,6 +107,46 @@ class Player:
         """
         self._enemy = enemy
 
+    def _edit_board(self):
+        """Edits the board using the user input.
+        First the user selects a ship,
+        then the ship is moved to the desired location.
+
+        If the user aborts the ship placement,
+        the ship is not moved.
+
+        If the user selects a cell that is not a ship,
+        the user is asked to select a ship again."""
+
+        while True:
+            try:
+                x, y = self._ui.get_location(
+                    self.board,
+                    instructions=cli_config.instructions["editing"],
+                    abortable=True,
+                )
+            except ActionAborted:
+                return
+            cell = self.board.cell(x, y)
+            if cell is not None:
+                break
+
+        ship = self.ships[cell.shipUUID]
+        try:
+            ship.under_edition = True
+            x, y, orientation = self._ui.get_move_ship_data(ship, self.board)
+            self.board.move_ship(ship.uuid, (x, y), orientation)
+        except ActionAborted:
+            pass
+
+        ship.under_edition = False
+
+        self._ui.show_menu(
+            "Do you confirm this ship placement?",
+            {"Confirm": lambda: None, "Edit": self._edit_board},
+            self.board,
+        )
+
     def initialize_board(self) -> None:
         """Initializes the board using the user input"""
         i = 0
@@ -117,9 +158,15 @@ class Player:
                 self.board.move_ship(ship.uuid, (x, y), orientation)
                 i += 1
                 ship.under_edition = False
-            except ShipPlacementAborted:
+            except ActionAborted:
                 if i > 0:
                     i -= 1
+
+        self._ui.show_menu(
+            "Do you confirm this ship placement?",
+            {"Confirm": lambda: None, "Edit": self._edit_board},
+            self.board,
+        )
 
     def attack_enemy(self) -> AttackResult:
         """Attacks the enemy using the user input

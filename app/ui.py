@@ -7,7 +7,7 @@ import curses
 from enum import IntEnum
 
 
-class ShipPlacementAborted(Exception):
+class ActionAborted(Exception):
     pass
 
 
@@ -223,6 +223,8 @@ class CLI:
         board: Board,
         additional_board: Board | None = None,
         show_hits_only: bool = False,
+        instructions: dict | None = None,
+        abortable: bool = False,
     ) -> tuple:
         """Gets a location from the user
 
@@ -230,8 +232,12 @@ class CLI:
             board (Board): board to get the location from
             additional_board (Board, optional): board to be shown but not to be interacted with. Defaults to None
             show_hits_only (bool, optional): Decides if only hits will be shown on the ``board``. Defaults to False.
+            instructions (dict | None, optional): Instructions from ``cli_config.instructions`` to be shown to the user. Defaults to None.
+            abortable (bool, optional): Decides if the user can abort the action. Defaults to False.
         Returns:
             tuple: (x, y) location
+        Raises:
+            ActionAborted: If the user aborts the action
         """
         x, y = 0, 0
 
@@ -246,9 +252,14 @@ class CLI:
             else:
                 self.show_board(board, (x, y))
 
+            if instructions:
+                self.show_instructions(instructions)
+
             key = self.screen.getch()
             if key == ord("\n"):
                 break
+            elif key in (127, 8) and abortable:  # 127 for darwin and 8 for win
+                raise ActionAborted
             else:
                 x, y = self._transform_location(
                     key, (x, y), board.size - 1, 0, board.size - 1, 0
@@ -287,8 +298,42 @@ class CLI:
                 curses.A_BOLD if i == 0 else 0,
             )
 
-    def show_instructions(self, instructions: str):
-        self.screen.addstr(config.BOARD_SIZE + 3, 0, instructions)
+    def show_instructions(self, data: dict) -> None:
+        self.screen.addstr(config.BOARD_SIZE + 3, 0, data["title"], curses.A_BOLD)
+        self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
+
+    def show_menu(
+        self, title: str, options: dict[str, Callable], board: Board | None = None
+    ) -> None:
+        option_number = 0
+        while True:
+            self.screen.clear()
+            self.screen.addstr(
+                (config.BOARD_SIZE + 3) if board else 0, 0, title, curses.A_BOLD
+            )
+            if board:
+                self.show_board(board, skip_refresh=True)
+
+            tab_width = 3
+            for i, option_name in enumerate(options.keys()):
+                self.screen.addstr(
+                    (config.BOARD_SIZE + 3 if board else 0) + 1 + i,
+                    tab_width,
+                    option_name,
+                    curses.color_pair(Styles.SELECTOR) if option_number == i else 0,
+                )
+
+            key = self.screen.getch()
+            if key == curses.KEY_DOWN:
+                option_number += 1
+            elif key == curses.KEY_UP:
+                option_number -= 1
+            elif key == ord("\n"):
+                list(options.values())[option_number]()
+                break
+
+            option_number %= 2
+            self.screen.refresh()
 
     def get_move_ship_data(self, ship: Ship, board: Board) -> tuple:
         """Gets the new position and orientation of a ship from user.
@@ -303,7 +348,7 @@ class CLI:
             tuple: (x, y, orientation)
 
         Raises:
-            ShipPlacementAborted: if the user aborts the ship placement
+            ActionAborted: if the user aborts the ship placement
         """
 
         location = ship.location
@@ -354,7 +399,7 @@ class CLI:
                 if possible_location:
                     return x, y, orientation
             elif key in (127, 8):  # 127 for darwin and 8 for win
-                raise ShipPlacementAborted
+                raise ActionAborted
             else:
                 x, y = self._transform_location(key, (x, y), max_x, min_x, max_y, min_y)
 
