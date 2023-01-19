@@ -73,6 +73,37 @@ class CLI:
         )
         return (max_x, min_x, max_y, min_y)
 
+    def _show_remaining_fleet(self, board: Board) -> None:
+        """Shows the remaining fleet during positioning
+
+        Args:
+            board (Board): board on which the positioning occurs
+        """
+        horizontal_offset = (
+            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
+            if board.player.side == 0
+            else 1
+        )
+
+        self.screen.addstr(0, horizontal_offset * 2, "Remaining fleet:")
+
+        tab_width = 3
+        ship_type_groups = {}
+        for ship in board.player.ships.values():
+            if ship.under_edition is True:
+                ship_type = ship.__class__.__name__
+                group = ship_type_groups.get(ship_type, [])
+                group.append(ship)
+                ship_type_groups[ship_type] = group
+
+        for i, (ship_type, ships) in enumerate(ship_type_groups.items()):
+            self.screen.addstr(
+                2 + i,
+                horizontal_offset * 2,
+                f"{len(ships):>{tab_width+1}}x {ship_type:<10} ({ships[0].size})",
+                curses.A_BOLD if i == 0 else 0,
+            )
+
     def _draw_ship(
         self,
         ship: Ship,
@@ -295,44 +326,25 @@ class CLI:
 
         return (x, y)
 
-    def _show_remaining_fleet(self, board: Board) -> None:
-        """Shows the remaining fleet during positioning
+    def show_instructions(self, data: dict) -> None:
+        """Shows given instructions on the screen
 
         Args:
-            board (Board): board on which the positioning occurs
+            data (dict): data from ``cli_config.instructions`` to be shown
         """
-        horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
-            if board.player.side == 0
-            else 1
-        )
-
-        self.screen.addstr(0, horizontal_offset * 2, "Remaining fleet:")
-
-        tab_width = 3
-        ship_type_groups = {}
-        for ship in board.player.ships.values():
-            if ship.under_edition is True:
-                ship_type = ship.__class__.__name__
-                group = ship_type_groups.get(ship_type, [])
-                group.append(ship)
-                ship_type_groups[ship_type] = group
-
-        for i, (ship_type, ships) in enumerate(ship_type_groups.items()):
-            self.screen.addstr(
-                2 + i,
-                horizontal_offset * 2,
-                f"{len(ships):>{tab_width+1}}x {ship_type:<10} ({ships[0].size})",
-                curses.A_BOLD if i == 0 else 0,
-            )
-
-    def show_instructions(self, data: dict) -> None:
         self.screen.addstr(config.BOARD_SIZE + 3, 0, data["title"], curses.A_BOLD)
         self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
 
     def show_menu(
         self, title: str, options: dict[str, Callable], board: Board | None = None
     ) -> None:
+        """Shows a menu on the screen
+
+        Args:
+            title (str): title of the menu
+            options (dict[str, Callable]): option_name -> function dictionary
+            board (Board | None, optional): Board to show. Defaults to None.
+        """
         option_number = 0
         while True:
             self.screen.clear()
