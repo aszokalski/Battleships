@@ -165,26 +165,31 @@ def test_ship_take_a_hit_already_destroyed():
 def test_carrier():
     ship = Carrier()
     assert ship.size == config.BOAT_SIZES["Carrier"]
+    assert str(ship) == "Carrier"
 
 
 def test_battleship():
     ship = Battleship()
     assert ship.size == config.BOAT_SIZES["Battleship"]
+    assert str(ship) == "Battleship"
 
 
 def test_destroyer():
     ship = Destroyer()
     assert ship.size == config.BOAT_SIZES["Destroyer"]
+    assert str(ship) == "Destroyer"
 
 
 def test_submarine():
     ship = Submarine()
     assert ship.size == config.BOAT_SIZES["Submarine"]
+    assert str(ship) == "Submarine"
 
 
 def test_patrol_boat():
     ship = PatrolBoat()
     assert ship.size == config.BOAT_SIZES["PatrolBoat"]
+    assert str(ship) == "Patrol Boat"
 
 
 def test_get_default_ship_class_set():

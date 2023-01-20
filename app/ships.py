@@ -173,12 +173,18 @@ class Carrier(Ship):
     def __init__(self) -> None:
         super().__init__(config.BOAT_SIZES["Carrier"])
 
+    def __str__(self):
+        return "Carrier"
+
 
 class Battleship(Ship):
     """Ship with ``self.size = BOAT_SIZES['Battleship']`` (Default: ``4``)"""
 
     def __init__(self) -> None:
         super().__init__(config.BOAT_SIZES["Battleship"])
+
+    def __str__(self):
+        return "Battleship"
 
 
 class Destroyer(Ship):
@@ -187,6 +193,9 @@ class Destroyer(Ship):
     def __init__(self) -> None:
         super().__init__(config.BOAT_SIZES["Destroyer"])
 
+    def __str__(self):
+        return "Destroyer"
+
 
 class Submarine(Ship):
     """Ship with ``self.size = BOAT_SIZES['Submarine']`` (Default: ``3``)"""
@@ -194,12 +203,18 @@ class Submarine(Ship):
     def __init__(self) -> None:
         super().__init__(config.BOAT_SIZES["Submarine"])
 
+    def __str__(self):
+        return "Submarine"
+
 
 class PatrolBoat(Ship):
     """Ship with self.size = ``BOAT_SIZES['PatrolBoat']`` (Default: ``2``)"""
 
     def __init__(self) -> None:
         super().__init__(config.BOAT_SIZES["PatrolBoat"])
+
+    def __str__(self):
+        return "Patrol Boat"
 
 
 def get_default_ship_set():

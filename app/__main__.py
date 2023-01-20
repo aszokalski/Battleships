@@ -21,7 +21,6 @@ def loop():
     else:
         player_1_name = cli.input("Please enter the name of Player 1: ")
         player_2_name = cli.input("Please enter the name of Player 2: ")
-
         player = Player(side=0, name=player_1_name, ui=cli)
         enemy = Player(side=1, name=player_2_name, ui=cli)
 
@@ -34,7 +33,7 @@ def loop():
     cli.show_menu(
         f"Player {winner} won!",
         {"Play again": loop, "Exit": lambda: None},
-    )
+    )()
 
 
 loop = cli.wrap(loop)

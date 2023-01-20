@@ -91,7 +91,7 @@ class CLI:
         ship_type_groups = {}
         for ship in board.player.ships.values():
             if ship.under_edition is True:
-                ship_type = ship.__class__.__name__
+                ship_type = str(ship)
                 group = ship_type_groups.get(ship_type, [])
                 group.append(ship)
                 ship_type_groups[ship_type] = group
