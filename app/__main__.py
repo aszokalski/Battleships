@@ -1,6 +1,7 @@
 from players import Player, AIPlayer
 from game import Game
 from ui import CLI
+from config import config
 
 cli = CLI()
 
@@ -17,8 +18,8 @@ def loop():
 
     if option == 0:
         player_name = cli.input("Please enter your name: ")
-        player = Player(side=0, name=player_name, ui=cli)
-        enemy = AIPlayer(side=1, name="AI")
+        player = Player(side=config.DEFAULT_PLAYER_SIDE, name=player_name, ui=cli)
+        enemy = AIPlayer(side=1 - config.DEFAULT_PLAYER_SIDE, name="AI")
     elif option == 1:
         player_1_name = cli.input("Please enter the name of Player 1: ")
         player_2_name = cli.input("Please enter the name of Player 2: ")
