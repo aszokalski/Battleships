@@ -200,6 +200,9 @@ class Player:
         Returns:
             AttackResult: result of the attack
         """
+        if self._enemy is None:
+            raise EnemyUnsetError("Enemy is not set")
+
         while True:
             x, y = self._ui.get_location(
                 self.enemy_board, self.board, True, cli_config.instructions["attacking"]
@@ -243,6 +246,8 @@ class AIPlayer(Player):
         Returns:
             AttackResult: result of the attack
         """
+        if self._enemy is None:
+            raise EnemyUnsetError("Enemy is not set")
         while True:
             if len(self._target_list) > 0:
                 x, y = self._target_list.pop()

@@ -9,6 +9,7 @@ USER_CONFIG_FILE = "user_config.json"
 
 class Config:
     def __init__(self) -> None:
+        """Config class"""
         try:
             with open(CONFIG_FOLDER + USER_CONFIG_FILE) as file:
                 self._load(file, isUserConfig=True)
@@ -19,6 +20,12 @@ class Config:
             self.restore_defaults()
 
     def _load(self, file: TextIOWrapper, isUserConfig: bool = False):
+        """loads the config from a file
+
+        Args:
+            file (TextIOWrapper): file to load from
+            isUserConfig (bool, optional): indicates if it's a user made config. Defaults to False.
+        """
         config = json.load(file)
         if isUserConfig:
             self._check_data(config)
@@ -29,6 +36,7 @@ class Config:
         self.DEFAULT_PLAYER_SIDE = config["DEFAULT_PLAYER_SIDE"]
 
     def save(self):
+        """Saves the config to ```user_config.json``"""
         with open(CONFIG_FOLDER + USER_CONFIG_FILE, "w") as file:
             json.dump(
                 {
@@ -42,12 +50,22 @@ class Config:
             )
 
     def _check_data(self, config: dict):
+        """Checks if the data in the config is valid
+
+        Args:
+            config (dict): config data
+        """
         if config["BOARD_SIZE"] < 10:
             self.restore_defaults()
         elif config["DEFAULT_ORIENTATION"] not in ["UP", "RIGHT"]:
             self.restore_defaults()
 
     def restore_defaults(self):
+        """Restores the config to the default values
+
+        Raises:
+            FileNotFoundError: if the default config file is not found
+        """
         try:
             os.remove(CONFIG_FOLDER + USER_CONFIG_FILE)
             self.__init__()

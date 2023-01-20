@@ -194,3 +194,13 @@ def test_player_edit_board():
 
     assert player.ships[ship_uuid].location == (5, 6)
     assert player.ships[ship_uuid].orientation == "LEFT"
+
+
+def test_enemy_unset_attack():
+    player = Player()
+    with pytest.raises(EnemyUnsetError):
+        player.attack_enemy()
+
+    player = AIPlayer()
+    with pytest.raises(EnemyUnsetError):
+        player.attack_enemy()
