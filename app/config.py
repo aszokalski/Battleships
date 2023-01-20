@@ -2,7 +2,7 @@ from io import TextIOWrapper
 import json
 import os
 
-CONFIG_FOLDER = "app/configs/"
+CONFIG_FOLDER = "configs/"
 DEFAULT_CONFIG_FILE = "default_config.json"
 USER_CONFIG_FILE = "user_config.json"
 
