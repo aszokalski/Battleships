@@ -25,7 +25,7 @@ class Game:
         Returns:
             bool: True if player A won, False if player B won
         """
-        while any([self._playerA.fleet_strength, self._playerB.fleet_strength]):
+        while all([self._playerA.fleet_strength, self._playerB.fleet_strength]):
             self._playerA.attack_enemy()
             self._playerB.attack_enemy()
 

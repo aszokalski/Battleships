@@ -111,6 +111,7 @@ def test_player_cli_initialize_board():
             pass
 
         def show_menu(self, *args):
+            return lambda: None
             pass
 
         def get_move_ship_data(self, ship: Ship, board: Board, *args):
@@ -172,7 +173,7 @@ def test_player_edit_board():
             pass
 
         def show_menu(self, *args):
-            pass
+            return lambda: None
 
         def get_location(self, *args, instructions, abortable):
             return (2, 3)

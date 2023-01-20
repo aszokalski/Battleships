@@ -38,6 +38,7 @@ class CLI:
         curses.curs_set(0)
         curses.start_color()
         curses.cbreak()
+        curses.echo()
 
         # Colors
         curses.init_pair(Styles.GRID, *cli_config.colors["grid"])
@@ -45,7 +46,6 @@ class CLI:
         curses.init_pair(Styles.DESTROYED, *cli_config.colors["destroyed"])
         curses.init_pair(Styles.SELECTOR, *cli_config.colors["selector"])
         curses.init_pair(Styles.ERROR, *cli_config.colors["error"])
-        curses.init_pair(Styles.SUNK, *cli_config.colors["sunk"])
 
     def _calculate_edge_indexes(
         self,
@@ -197,6 +197,22 @@ class CLI:
 
         return x, y
 
+    def input(self, prompt: str) -> str:
+        """Reads user input.
+
+        Args:
+            prompt (str): prompt to be shown
+
+        Returns:
+            str: user input
+        """
+        self.screen.clear()
+        curses.curs_set(1)
+        self.screen.addstr(prompt)
+        value = self.screen.getstr()
+        curses.curs_set(0)
+        return value
+
     def show_board(
         self,
         board: Board,
@@ -336,14 +352,17 @@ class CLI:
         self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
 
     def show_menu(
-        self, title: str, options: dict[str, Callable], board: Board | None = None
-    ) -> None:
+        self, title: str, options: dict[str, any], board: Board | None = None
+    ) -> any:
         """Shows a menu on the screen
 
         Args:
             title (str): title of the menu
-            options (dict[str, Callable]): option_name -> function dictionary
+            options (dict[str, any]): option_name -> value dictionary
             board (Board | None, optional): Board to show. Defaults to None.
+
+        Returns:
+            any: value of the selected option
         """
         option_number = 0
         while True:
@@ -369,8 +388,7 @@ class CLI:
             elif key == curses.KEY_UP:
                 option_number -= 1
             elif key == ord("\n"):
-                list(options.values())[option_number]()
-                break
+                return list(options.values())[option_number]
 
             option_number %= 2
             self.screen.refresh()

@@ -159,7 +159,7 @@ class Player:
             "Do you confirm this ship placement?",
             {"Confirm": lambda: None, "Edit": self._edit_board},
             self.board,
-        )
+        )()
 
     def initialize_board(self) -> None:
         """Initializes the board using the user input"""
@@ -192,7 +192,7 @@ class Player:
             "Do you confirm this ship placement?",
             {"Confirm": lambda: None, "Edit": self._edit_board},
             self.board,
-        )
+        )()
 
     def attack_enemy(self) -> AttackResult:
         """Attacks the enemy using the user input
