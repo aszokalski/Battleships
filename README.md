@@ -1,3 +1,5 @@
+![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
+
 # Quickstart
 
 ## Documentation
@@ -26,6 +28,16 @@ source docs/generate.sh
 
 - Open `docs.html`
 
+
+## Usage
+To start the game run:
+```Sh
+python app
+```
+in the repository root directory
+
 ## Configuration
 
-You can configure the game by editing the config file: `app/config.py`
+You can configure the game by creating a config file: `configs/user_config.json` based on `configs/default_config.json`.
+
+or you can use the in-game settings
