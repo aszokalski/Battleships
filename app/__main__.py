@@ -6,23 +6,28 @@ cli = CLI()
 
 
 def loop():
-    game_mode = cli.show_menu(
-        "Game mode:",
+    option = cli.show_menu(
+        "Menu:",
         {
             "Player vs Computer": 0,
             "Player vs Player": 1,
+            "Settings": 2,
         },
     )
 
-    if game_mode == 0:
+    if option == 0:
         player_name = cli.input("Please enter your name: ")
         player = Player(side=0, name=player_name, ui=cli)
         enemy = AIPlayer(side=1, name="AI")
-    else:
+    elif option == 1:
         player_1_name = cli.input("Please enter the name of Player 1: ")
         player_2_name = cli.input("Please enter the name of Player 2: ")
         player = Player(side=0, name=player_1_name, ui=cli)
         enemy = Player(side=1, name=player_2_name, ui=cli)
+    else:
+        cli.show_settings()
+        loop()
+        return
 
     game = Game(player, enemy)
 

@@ -52,3 +52,5 @@ colors = {
     "error": (curses.COLOR_RED, curses.COLOR_BLACK),
     "sunk": (curses.COLOR_BLACK, curses.COLOR_BLACK),
 }
+
+DEFAULT_SPACE_BETWEEN_BOARDS = 3  # in terminal character widths

@@ -1,4 +1,4 @@
-import config
+from config import config
 import numpy as np
 from typing import Literal
 from ships import Ship, LocationOutsideOfRangeError

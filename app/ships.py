@@ -1,5 +1,5 @@
 from utils import get_uuid
-import config
+from config import config
 from typing import Literal
 from collections.abc import Sequence
 

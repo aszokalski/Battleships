@@ -3,7 +3,7 @@ from ships import Ship, get_default_ship_set
 from ui import CLI, ActionAborted
 from utils import AttackResult
 from random import choice
-import config
+from config import config
 import cli_config
 
 

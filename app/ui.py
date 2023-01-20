@@ -1,6 +1,6 @@
 from boards import Board
 from ships import Ship
-import config
+from config import config
 import cli_config
 from typing import Callable, Literal
 import curses
@@ -80,7 +80,7 @@ class CLI:
             board (Board): board on which the positioning occurs
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
+            config.BOARD_SIZE + cli_config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 0
             else 1
         )
@@ -122,7 +122,7 @@ class CLI:
             the ship in that location. Defaults to True.
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
+            config.BOARD_SIZE + cli_config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 1
             else 1
         )
@@ -209,9 +209,75 @@ class CLI:
         self.screen.clear()
         curses.curs_set(1)
         self.screen.addstr(prompt)
-        value = self.screen.getstr()
+        y, x = self.screen.getyx()
+        while True:
+            # Reset the cursor position
+            self.screen.move(y, x)
+            value = self.screen.getstr()
+            if value:
+                break
         curses.curs_set(0)
         return value.decode("utf-8")
+
+    def show_menu(
+        self, title: str, options: dict[str, any], board: Board | None = None
+    ) -> any:
+        """Shows a menu on the screen
+
+        Args:
+            title (str): title of the menu
+            options (dict[str, any]): option_name -> value dictionary
+            board (Board | None, optional): Board to show. Defaults to None.
+
+        Returns:
+            any: value of the selected option
+        """
+        option_number = 0
+        while True:
+            self.screen.clear()
+            self.screen.addstr(
+                (config.BOARD_SIZE + 3) if board else 0, 0, title, curses.A_BOLD
+            )
+            if board:
+                self.show_board(board, skip_refresh=True)
+
+            tab_width = 3
+            for i, option_name in enumerate(options.keys()):
+                self.screen.addstr(
+                    (config.BOARD_SIZE + 3 if board else 0) + 1 + i,
+                    tab_width,
+                    option_name,
+                    curses.color_pair(Styles.SELECTOR) if option_number == i else 0,
+                )
+
+            key = self.screen.getch()
+            if key == curses.KEY_DOWN:
+                option_number += 1
+            elif key == curses.KEY_UP:
+                option_number -= 1
+            elif key == ord("\n"):
+                return list(options.values())[option_number]
+
+            option_number %= len(options)
+            self.screen.refresh()
+
+    def show_settings(self):
+        def restore_defaults():
+            config.restore_defaults()
+            self.show_settings()
+
+        self.show_menu(
+            "Settings",
+            {
+                f"Board size: {config.BOARD_SIZE}": lambda: None,
+                f"Default orientation: {config.BOARD_SIZE}": lambda: None,
+                f"Default player side: {config.DEFAULT_PLAYER_SIDE}": lambda: None,
+                "Edit boat sizes": lambda: None,
+                "Edit default ship set": lambda: None,
+                "Restore defaults": restore_defaults,
+                "<- Back": lambda: None,
+            },
+        )()
 
     def show_board(
         self,
@@ -233,7 +299,7 @@ class CLI:
             display_strength (bool, optional): Decides if the ships strength will be shown. Defaults to False.
         """
         horizontal_offset = (
-            config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
+            config.BOARD_SIZE + cli_config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
             if board.player.side == 1
             else 1
         )
@@ -363,48 +429,6 @@ class CLI:
         self.screen.addstr(config.BOARD_SIZE + 3, 0, data["title"], curses.A_BOLD)
         self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
 
-    def show_menu(
-        self, title: str, options: dict[str, any], board: Board | None = None
-    ) -> any:
-        """Shows a menu on the screen
-
-        Args:
-            title (str): title of the menu
-            options (dict[str, any]): option_name -> value dictionary
-            board (Board | None, optional): Board to show. Defaults to None.
-
-        Returns:
-            any: value of the selected option
-        """
-        option_number = 0
-        while True:
-            self.screen.clear()
-            self.screen.addstr(
-                (config.BOARD_SIZE + 3) if board else 0, 0, title, curses.A_BOLD
-            )
-            if board:
-                self.show_board(board, skip_refresh=True)
-
-            tab_width = 3
-            for i, option_name in enumerate(options.keys()):
-                self.screen.addstr(
-                    (config.BOARD_SIZE + 3 if board else 0) + 1 + i,
-                    tab_width,
-                    option_name,
-                    curses.color_pair(Styles.SELECTOR) if option_number == i else 0,
-                )
-
-            key = self.screen.getch()
-            if key == curses.KEY_DOWN:
-                option_number += 1
-            elif key == curses.KEY_UP:
-                option_number -= 1
-            elif key == ord("\n"):
-                return list(options.values())[option_number]
-
-            option_number %= 2
-            self.screen.refresh()
-
     def get_move_ship_data(
         self, ship: Ship, board: Board, randomizable: bool = False
     ) -> tuple | None:
@@ -506,7 +530,9 @@ class CLI:
 
     def close(self):
         """Closes the screen"""
-        self.screen.keypad(0)
-        curses.echo()
-        curses.nocbreak()
-        curses.endwin()
+        if self.screen:
+            self.screen.keypad(0)
+            self.screen = None
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
