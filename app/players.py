@@ -223,7 +223,11 @@ class AIPlayer(Player):
             ships (list, optional): initial ship list. If not set, default ship set will be used. Defaults to None.
             side (int, optional): side to display the board (0 - left, 1 - right)
         """
+        self._target_list = []
         super().__init__(name, ships, side, None)
+
+    def set_enemy(self, enemy: "Player") -> None:
+        return super().set_enemy(enemy)
 
     def initialize_board(self) -> None:
         """Initializes the board with random ship placement"""
@@ -234,20 +238,35 @@ class AIPlayer(Player):
             ship.under_edition = False
 
     def attack_enemy(self) -> AttackResult:
-        """Attacks the enemy using most probable coordinates
+        """Attacks the enemy using the hunt-target strategy. If the last attack was a hit, the algorithm will attack the surrounding cells.
 
         Returns:
             AttackResult: result of the attack
         """
-        # TODO: make it smarter
         while True:
-            x, y = choice(
-                [
-                    (i, j)
-                    for i in range(config.BOARD_SIZE)
-                    for j in range(config.BOARD_SIZE)
-                ]
-            )
+            if len(self._target_list) > 0:
+                x, y = self._target_list.pop()
+            else:
+                x, y = x, y = choice(
+                    [
+                        (i, j)
+                        for i in range(config.BOARD_SIZE)
+                        for j in range(config.BOARD_SIZE)
+                    ]
+                )
+
             if self.enemy_board.cell(x, y) is None or self.enemy_board.cell(x, y).alive:
                 self.last_attack_result = self.enemy_board.attack(x, y)
+                if self.last_attack_result == AttackResult.HIT:
+                    for i in range(-1, 2):
+                        for j in range(-1, 2):
+                            if (
+                                x + i in range(config.BOARD_SIZE)
+                                and y + j in range(config.BOARD_SIZE)
+                                and (x + i, y + j) not in self._target_list
+                            ):
+                                self._target_list.append((x + i, y + j))
+                elif self.last_attack_result == AttackResult.SUNK:
+                    self._target_list = []
+
                 break

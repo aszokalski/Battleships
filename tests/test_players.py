@@ -159,12 +159,18 @@ def test_player_cli_attack_enemy():
 
 def test_ai_player_attack_enemy():
     player = AIPlayer()
-    enemy = Player()
+    enemy = AIPlayer()
     player.set_enemy(enemy)
-    enemy.board.add_ship(list(enemy.ships.keys())[0], (2, 3), "UP")
 
-    player.attack_enemy()
-    # TODO: Add a test for the AIPlayer attack
+    ship_uuid = list(enemy.ships.keys())[0]
+    enemy.board.add_ship(ship_uuid, (2, 3), "UP")
+
+    player._target_list = [(2, 3)]
+    for _ in range(20):
+        player.attack_enemy()
+
+    # Over 20 attacks, the AI should have sunk the 5 square ship
+    assert enemy.ships[ship_uuid].strength == 0
 
 
 def test_player_edit_board():

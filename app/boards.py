@@ -291,7 +291,7 @@ class Board:
                 square_locations = self.calculate_square_locations(
                     (x, y), orientation, size
                 )
-                if all(self._matrix[*square] is None for square in square_locations[1]):
+                if all(self.cell(*square) is None for square in square_locations[1]):
                     possible_locations.append((x, y))
 
         return possible_locations

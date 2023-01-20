@@ -262,6 +262,8 @@ class CLI:
             self.screen.refresh()
 
     def show_settings(self):
+        """Shows the settings menu"""
+
         def restore_defaults():
             config.restore_defaults()
             self.show_settings()
