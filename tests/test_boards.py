@@ -9,7 +9,7 @@ from boards import (
 from players import Player
 from ships import Ship, HitDestroyedSquareError, LocationOutsideOfRangeError
 from utils import AttackResult
-import config
+from config import config
 import pytest
 import numpy as np
 from itertools import chain
@@ -169,7 +169,7 @@ def test_board_calculate_square_locations_sticking_out_2():
 
     with pytest.raises(LocationOutsideOfRangeError):
         board.calculate_square_locations(
-            start_location=(7, 0), orientation="RIGHT", size=5
+            start_location=(config.BOARD_SIZE - 4, 0), orientation="RIGHT", size=5
         )
 
 
@@ -384,7 +384,8 @@ def test_board_get_cell_index_error():
         board.cell(123, 1)
 
 
-def test_board_get_possible_locations_1():
+def test_board_get_possible_locations_1(monkeypatch):
+    monkeypatch.setattr("config.config.BOARD_SIZE", 10)
     player = Player()
     board = Board(player=player)
 
@@ -393,7 +394,8 @@ def test_board_get_possible_locations_1():
     ]
 
 
-def test_board_get_possible_locations_2():
+def test_board_get_possible_locations_2(monkeypatch):
+    monkeypatch.setattr("config.config.BOARD_SIZE", 10)
     player = Player()
     board = Board(player=player)
 
@@ -402,7 +404,8 @@ def test_board_get_possible_locations_2():
     ]
 
 
-def test_board_get_possible_locations_occupied_squares_1():
+def test_board_get_possible_locations_occupied_squares_1(monkeypatch):
+    monkeypatch.setattr("config.config.BOARD_SIZE", 10)
     player = Player()
     board = Board(player=player)
     board._matrix[3, 4] = Cell(shipUUID=1, squareIndex=0, alive=True)
@@ -414,7 +417,8 @@ def test_board_get_possible_locations_occupied_squares_1():
     ]
 
 
-def test_board_get_possible_locations_occupied_squares_2():
+def test_board_get_possible_locations_occupied_squares_2(monkeypatch):
+    monkeypatch.setattr("config.config.BOARD_SIZE", 10)
     player = Player()
     board = Board(player=player)
     board._matrix[0, 0] = Cell(shipUUID=1, squareIndex=0, alive=True)
@@ -426,7 +430,8 @@ def test_board_get_possible_locations_occupied_squares_2():
     ]
 
 
-def test_board_get_possible_locations_occupied_squares_3():
+def test_board_get_possible_locations_occupied_squares_3(monkeypatch):
+    monkeypatch.setattr("config.config.BOARD_SIZE", 10)
     player = Player()
     board = Board(player=player)
     board._matrix[0, 0] = Cell(shipUUID=1, squareIndex=0, alive=True)

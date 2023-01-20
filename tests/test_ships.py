@@ -13,7 +13,7 @@ from ships import (
     get_default_ship_set,
 )
 import pytest
-import config
+from config import config
 
 
 def test_ship_constructor(monkeypatch):
@@ -93,7 +93,7 @@ def test_ship_under_edition_type_error():
 def test_ship_location_outside_of_range():
     ship = Ship(size=3)
     with pytest.raises(LocationOutsideOfRangeError):
-        ship.location = (10, 4)
+        ship.location = (config.BOARD_SIZE, 4)
 
 
 def test_ship_location_none():
@@ -192,16 +192,13 @@ def test_patrol_boat():
     assert str(ship) == "Patrol Boat"
 
 
-def test_get_default_ship_class_set():
-    pre_val = config.DEFAULT_SHIP_SET
-
-    config.DEFAULT_SHIP_SET = [(2, "Carrier"), (1, "Battleship")]
+def test_get_default_ship_class_set(monkeypatch):
+    monkeypatch.setattr(
+        "config.config.DEFAULT_SHIP_SET", {"Carrier": 2, "Battleship": 1}
+    )
 
     default_set = get_default_ship_set()
 
     assert isinstance(default_set[0], Carrier)
     assert isinstance(default_set[1], Carrier)
     assert isinstance(default_set[2], Battleship)
-
-    # setting it back to default because other tests use it
-    config.DEFAULT_SHIP_SET = pre_val

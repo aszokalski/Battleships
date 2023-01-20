@@ -227,7 +227,7 @@ def get_default_ship_set():
     }
 
     default_ship_set = []
-    for qty, name in config.DEFAULT_SHIP_SET:
+    for name, qty in config.DEFAULT_SHIP_SET.items():
         for _ in range(qty):
             default_ship_set.append(ship_name_to_class[name]())
 

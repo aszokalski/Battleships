@@ -2,7 +2,7 @@ from players import Player, AIPlayer, EnemyUnsetError
 from ships import Ship, get_default_ship_set
 from boards import Board
 from utils import AttackResult
-import config
+from config import config
 import pytest
 import numpy as np
 

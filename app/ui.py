@@ -266,15 +266,99 @@ class CLI:
             config.restore_defaults()
             self.show_settings()
 
+        def change_board_size():
+            size = self.show_menu("Board size", {"10x10": 10, "15x15": 15, "20x20": 20})
+            config.BOARD_SIZE = size
+            config.save()
+            self.show_settings()
+
+        def change_default_orientation():
+            orientation = self.show_menu(
+                "Default ship orientation", {"UP": "UP", "RIGHT": "RIGHT"}
+            )
+            config.DEFAULT_ORIENTATION = orientation
+            config.save()
+            self.show_settings()
+
+        def change_default_player_side():
+            side = self.show_menu("Player side", {"LEFT": 0, "RIGHT": 1})
+            config.DEFAULT_PLAYER_SIDE = side
+            config.save()
+            self.show_settings()
+
+        def ship_sizes_subsettings():
+            def change_ship_size(display_name: str, ship_name: str):
+                size = self.show_menu(
+                    f"{display_name} size",
+                    {str(size): size for size in range(1, config.BOARD_SIZE + 1)},
+                )
+                config.BOAT_SIZES[ship_name] = size
+                config.save()
+                ship_sizes_subsettings()
+
+            self.show_menu(
+                "Ship sizes",
+                {
+                    f"Carrier: {config.BOAT_SIZES['Carrier']}": lambda: change_ship_size(
+                        "Carrier", "Carrier"
+                    ),
+                    f"Battleship: {config.BOAT_SIZES['Battleship']}": lambda: change_ship_size(
+                        "Battleship", "Battleship"
+                    ),
+                    f"Destroyer: {config.BOAT_SIZES['Destroyer']}": lambda: change_ship_size(
+                        "Destroyer", "Destroyer"
+                    ),
+                    f"Submarine: {config.BOAT_SIZES['Submarine']}": lambda: change_ship_size(
+                        "Submarine", "Submarine"
+                    ),
+                    f"Patrol Boat: {config.BOAT_SIZES['PatrolBoat']}": lambda: change_ship_size(
+                        "Patrol Boat", "PatrolBoat"
+                    ),
+                    "<- Back": self.show_settings,
+                },
+            )()
+
+        def ship_set_subsettings():
+            def change_ship_count(display_name: str, ship_name: str):
+                count = self.show_menu(
+                    f"{display_name} count",
+                    {str(size): size for size in range(0, 5)},
+                )
+                config.DEFAULT_SHIP_SET[ship_name] = count
+                config.save()
+                ship_set_subsettings()
+
+            self.show_menu(
+                "Ship set",
+                {
+                    f"Carrier: {config.DEFAULT_SHIP_SET['Carrier']}": lambda: change_ship_count(
+                        "Carrier", "Carrier"
+                    ),
+                    f"Battleship: {config.DEFAULT_SHIP_SET['Battleship']}": lambda: change_ship_count(
+                        "Battleship", "Battleship"
+                    ),
+                    f"Destroyer: {config.DEFAULT_SHIP_SET['Destroyer']}": lambda: change_ship_count(
+                        "Destroyer", "Destroyer"
+                    ),
+                    f"Submarine: {config.DEFAULT_SHIP_SET['Submarine']}": lambda: change_ship_count(
+                        "Submarine", "Submarine"
+                    ),
+                    f"Patrol Boat: {config.DEFAULT_SHIP_SET['PatrolBoat']}": lambda: change_ship_count(
+                        "Patrol Boat", "PatrolBoat"
+                    ),
+                    "<- Back": self.show_settings,
+                },
+            )()
+
         self.show_menu(
             "Settings",
             {
-                f"Board size: {config.BOARD_SIZE}": lambda: None,
-                f"Default orientation: {config.BOARD_SIZE}": lambda: None,
-                f"Default player side: {config.DEFAULT_PLAYER_SIDE}": lambda: None,
-                "Edit boat sizes": lambda: None,
-                "Edit default ship set": lambda: None,
-                "Restore defaults": restore_defaults,
+                f"Board size: {config.BOARD_SIZE}x{config.BOARD_SIZE}": change_board_size,
+                f"Default ship orientation: {config.DEFAULT_ORIENTATION}": change_default_orientation,
+                f"Player side: {['LEFT', 'RIGHT'][config.DEFAULT_PLAYER_SIDE]}": change_default_player_side,
+                "Ship sizes": ship_sizes_subsettings,
+                "Ship set ": ship_set_subsettings,
+                "↺ Restore defaults": restore_defaults,
                 "<- Back": lambda: None,
             },
         )()

@@ -1,4 +1,4 @@
-import config
+from config import config
 
 
 def test_config_board_size():
@@ -34,8 +34,8 @@ def test_config_boat_sizes():
 def test_config_default_ship_set():
     pre_val = config.DEFAULT_SHIP_SET
 
-    config.DEFAULT_SHIP_SET = []
-    assert config.DEFAULT_SHIP_SET == []
+    config.DEFAULT_SHIP_SET = {}
+    assert config.DEFAULT_SHIP_SET == {}
 
     # setting it back to default because other tests use it
     config.DEFAULT_SHIP_SET = pre_val
