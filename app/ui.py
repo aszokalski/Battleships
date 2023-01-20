@@ -211,7 +211,7 @@ class CLI:
         self.screen.addstr(prompt)
         value = self.screen.getstr()
         curses.curs_set(0)
-        return value
+        return value.decode("utf-8")
 
     def show_board(
         self,
@@ -220,6 +220,7 @@ class CLI:
         ommit_locations: list | None = None,
         skip_refresh: bool = False,
         show_hits_only: bool = False,
+        display_strength: bool = False,
     ) -> None:
         """Prints board to the console.
 
@@ -229,6 +230,7 @@ class CLI:
             ommit_locations (list | None, optional): list of (x, y) locations not to be shown. Defaults to None.
             skip_refresh (bool, optional): Decides of the function will skip the screen refresh. Defaults to False.
             show_hits_only (bool, optional): Decides if only hits will be shown. Defaults to False.
+            display_strength (bool, optional): Decides if the ships strength will be shown. Defaults to False.
         """
         horizontal_offset = (
             config.BOARD_SIZE + config.DEFAULT_SPACE_BETWEEN_BOARDS + 1
@@ -239,7 +241,11 @@ class CLI:
         if not skip_refresh:
             self.screen.clear()
 
-        self.screen.addstr(0, (horizontal_offset - 1) * 2, board.player.name)
+        if display_strength:
+            header = f"{board.player.name} ({board.player.fleet_strength})"
+        else:
+            header = board.player.name
+        self.screen.addstr(0, (horizontal_offset - 1) * 2, header)
 
         for i in range(board.size):
             for j in range(board.size):
@@ -305,9 +311,15 @@ class CLI:
             self.screen.clear()
             if additional_board:
                 self.show_board(
-                    board, (x, y), skip_refresh=True, show_hits_only=show_hits_only
+                    board,
+                    (x, y),
+                    skip_refresh=True,
+                    show_hits_only=show_hits_only,
+                    display_strength=True,
                 )
-                self.show_board(additional_board, skip_refresh=True)
+                self.show_board(
+                    additional_board, skip_refresh=True, display_strength=True
+                )
                 self.screen.refresh()
             else:
                 self.show_board(board, (x, y))
