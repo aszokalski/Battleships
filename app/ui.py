@@ -470,7 +470,10 @@ class CLI:
                     display_strength=True,
                 )
                 self.show_board(
-                    additional_board, skip_refresh=True, display_strength=True
+                    additional_board,
+                    skip_refresh=True,
+                    display_strength=True,
+                    show_hits_only=board.player.name != "AI",
                 )
                 self.screen.refresh()
             else:
@@ -608,9 +611,8 @@ class CLI:
             except curses.error:
                 self.close()
                 print("Terminal window too small. Please resize it and try again.")
-            except BaseException as e:
+            except BaseException:
                 self.close()
-                raise e
 
         return wrapped_function
 

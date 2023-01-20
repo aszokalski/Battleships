@@ -29,6 +29,7 @@ class Config:
         config = json.load(file)
         if isUserConfig:
             self._check_data(config)
+
         self.BOARD_SIZE = config["BOARD_SIZE"]
         self.DEFAULT_ORIENTATION = config["DEFAULT_ORIENTATION"]
         self.BOAT_SIZES = config["BOAT_SIZES"]
