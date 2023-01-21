@@ -227,6 +227,8 @@ class AIPlayer(Player):
             side (int, optional): side to display the board (0 - left, 1 - right)
         """
         self._target_list = []
+        self._previous_hit = None
+        self._previous_shots = []
         super().__init__(name, ships, side, None)
 
     def set_enemy(self, enemy: "Player") -> None:
@@ -241,7 +243,9 @@ class AIPlayer(Player):
             ship.under_edition = False
 
     def attack_enemy(self) -> AttackResult:
-        """Attacks the enemy using the hunt-target strategy. If the last attack was a hit, the algorithm will attack the surrounding cells.
+        """Attacks the enemy using the hunt-target strategy.
+        Hunt mode: hitting random cells. If the last attack was a hit, the algorithm switches to target mode.
+        Target mode: hitting cells around the last hit cell. If the ship is sunk, the algorithm switches to hunt mode.
 
         Returns:
             AttackResult: result of the attack
@@ -252,15 +256,15 @@ class AIPlayer(Player):
             if len(self._target_list) > 0:
                 x, y = self._target_list.pop()
             else:
-                x, y = x, y = choice(
-                    [
-                        (i, j)
-                        for i in range(config.BOARD_SIZE)
-                        for j in range(config.BOARD_SIZE)
-                    ]
-                )
+                possible_locations = []
+                for i in range(config.BOARD_SIZE):
+                    for j in range(config.BOARD_SIZE):
+                        if (i, j) not in self._previous_shots:
+                            possible_locations.append((i, j))
+                x, y = x, y = choice(possible_locations)
 
             if self.enemy_board.cell(x, y) is None or self.enemy_board.cell(x, y).alive:
+                self._previous_shots.append((x, y))
                 self.last_attack_result = self.enemy_board.attack(x, y)
                 if self.last_attack_result == AttackResult.HIT:
                     for i in range(-1, 2):
@@ -270,8 +274,23 @@ class AIPlayer(Player):
                                 and y + j in range(config.BOARD_SIZE)
                                 and (x + i, y + j) not in self._target_list
                             ):
+
                                 self._target_list.append((x + i, y + j))
+
+                    new_target_list = []
+                    for target in self._target_list:
+                        if target == self._previous_hit or target == (x, y):
+                            pass
+                        elif (target[0] == x or target[1] == y) and (
+                            self._previous_hit is None
+                            or target[0] == self._previous_hit[0]
+                            or target[1] == self._previous_hit[1]
+                        ):
+                            new_target_list.append(target)
+                    self._target_list = new_target_list
+                    self._previous_hit = (x, y)
                 elif self.last_attack_result == AttackResult.SUNK:
                     self._target_list = []
+                    self._previous_hit = None
 
                 break

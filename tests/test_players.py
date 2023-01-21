@@ -166,10 +166,10 @@ def test_ai_player_attack_enemy():
     enemy.board.add_ship(ship_uuid, (2, 3), "UP")
 
     player._target_list = [(2, 3)]
-    for _ in range(20):
+    for _ in range(10):
         player.attack_enemy()
 
-    # Over 20 attacks, the AI should have sunk the 5 square ship
+    # Over 10 moves, the AI should have sunk the 5 square ship
     assert enemy.ships[ship_uuid].strength == 0
 
 

@@ -1,6 +1,7 @@
 ![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
 
-# Quickstart
+# Wstęp
+Battleships to
 
 ## Documentation
 

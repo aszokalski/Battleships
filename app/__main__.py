@@ -2,13 +2,14 @@ from players import Player, AIPlayer
 from game import Game
 from ui import CLI
 from config import config
+from cli_config import icon_ascii_art
 
 cli = CLI()
 
 
 def loop():
     option = cli.show_menu(
-        "Menu:",
+        icon_ascii_art,
         {
             "Player vs Computer": 0,
             "Player vs Player": 1,

@@ -220,7 +220,10 @@ class CLI:
         return value.decode("utf-8")
 
     def show_menu(
-        self, title: str, options: dict[str, any], board: Board | None = None
+        self,
+        title: str,
+        options: dict[str, any],
+        board: Board | None = None,
     ) -> any:
         """Shows a menu on the screen
 
@@ -244,7 +247,9 @@ class CLI:
             tab_width = 3
             for i, option_name in enumerate(options.keys()):
                 self.screen.addstr(
-                    (config.BOARD_SIZE + 3 if board else 0) + 1 + i,
+                    (config.BOARD_SIZE + 3 if board else 0)
+                    + len(title.split("\n")) + 1
+                    + i,
                     tab_width,
                     option_name,
                     curses.color_pair(Styles.SELECTOR) if option_number == i else 0,
@@ -365,6 +370,15 @@ class CLI:
             },
         )()
 
+    def show_instructions(self, data: dict) -> None:
+        """Shows given instructions on the screen
+
+        Args:
+            data (dict): data from ``cli_config.instructions`` to be shown
+        """
+        self.screen.addstr(config.BOARD_SIZE + 3, 0, data["title"], curses.A_BOLD)
+        self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
+
     def show_board(
         self,
         board: Board,
@@ -408,7 +422,7 @@ class CLI:
                     symbol = cli_config.symbols["cell"]
                 else:
                     sunk = board.player.ships[cell.shipUUID].strength == 0
-                    bold = True
+                    bold = not show_hits_only
                     if cell.alive:
                         color = Styles.SHIP if not show_hits_only else Styles.GRID
                         symbol = (
@@ -508,15 +522,6 @@ class CLI:
                 )
 
         return (x, y)
-
-    def show_instructions(self, data: dict) -> None:
-        """Shows given instructions on the screen
-
-        Args:
-            data (dict): data from ``cli_config.instructions`` to be shown
-        """
-        self.screen.addstr(config.BOARD_SIZE + 3, 0, data["title"], curses.A_BOLD)
-        self.screen.addstr(config.BOARD_SIZE + 4, 0, data["instructions"])
 
     def get_move_ship_data(
         self, ship: Ship, board: Board, randomizable: bool = False
